@@ -1,18 +1,24 @@
+# ================== Maven/Gradle 构建产物 ==================
 target/
+build/
+*.jar
+*.war
+*.ear
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
+# ================== IDE 配置文件（重点更新！） ==================
+# IntelliJ IDEA（直接忽略整个文件夹，最彻底）
+.idea/
 *.iws
 *.iml
 *.ipr
 
-### Eclipse ###
+# Qoder 文件夹（你要求新增的）
+.qoder/
+
+# Eclipse
 .apt_generated
 .classpath
 .factorypath
@@ -21,18 +27,51 @@ target/
 .springBeans
 .sts4-cache
 
-### NetBeans ###
+# NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
+# VS Code
 .vscode/
 
-### Mac OS ###
+# ================== 日志文件 ==================
+*.log
+logs/
+log/
+
+# ================== 敏感配置文件（防止泄露密码/密钥） ==================
+.env
+.env.local
+.env.*.local
+application-local.yml
+application-local.yaml
+application-dev.yml
+application-dev.yaml
+config-local.properties
+secrets.properties
+credentials.properties
+
+# ================== 临时文件/备份文件 ==================
+*.tmp
+*.bak
+*.swp
+*~
+.DS_Store?
+Thumbs.db
+
+# ================== 操作系统文件 ==================
+# Mac OS
 .DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ================== Spring Boot 特有 ==================
+spring-configuration-metadata.json
