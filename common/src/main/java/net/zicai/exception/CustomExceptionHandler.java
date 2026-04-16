@@ -10,6 +10,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
 import java.util.Set;
@@ -66,6 +67,15 @@ public class CustomExceptionHandler {
             return JsonData.buildCodeAndMsg(1, message);
         }
         return JsonData.buildCodeAndMsg(1,"参数约束校验失败");
+    }
+
+    /**
+     * 资源未找到异常
+     */
+    @ExceptionHandler(value = NoResourceFoundException.class)
+    public JsonData handleNoResourceFoundException(NoResourceFoundException e) {
+        log.warn("[资源未找到] path: {}", e.getResourcePath());
+        return JsonData.buildCodeAndMsg(404, "资源未找到");
     }
 
     /**
