@@ -47,6 +47,16 @@ public enum BizCodeEnum {
     SMS_CODE_ERROR(110018, "短信验证码错误"),
 
     /**
+     * 短信服务相关错误码
+     */
+    SMS_SEND_ERROR(240101, "短信发送失败"),
+    SMS_PARAM_ERROR(240102, "短信参数错误"),
+    SMS_ACCOUNT_ERROR(240103, "短信账号配置错误"),
+    SMS_BALANCE_NOT_ENOUGH(240104, "短信余额不足"),
+    SMS_CONTENT_SENSITIVE(240105, "短信内容含有敏感词"),
+    SMS_CONTENT_TOO_LONG(240106, "短信内容过长"),
+
+    /**
      * 文件相关错误码
      */
     FILE_UPLOAD_USER_IMG_FAIL(110010, "用户头像文件上传失败"),

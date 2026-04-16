@@ -4,7 +4,9 @@ import com.google.code.kaptcha.Producer;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import com.google.code.kaptcha.util.Config;
 import lombok.extern.slf4j.Slf4j;
+import net.zicai.enums.BizCodeEnum;
 import net.zicai.enums.CheckCodeTypeEnum;
+import net.zicai.exception.BizException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -76,11 +78,11 @@ public class CaptchaUtil {
         log.info("验证图形验证码的key：{}", captchaKey);
         String savedCaptcha = redisTemplate.opsForValue().get(captchaKey);
         if (savedCaptcha == null) {
-            throw new RuntimeException("验证码已过期");
+            throw new BizException(BizCodeEnum.CODE_CAPTCHA_ERROR.getCode(), "图形验证码已过期");
         }
 
         if (!savedCaptcha.equalsIgnoreCase(captcha)) {
-            throw new RuntimeException("验证码错误");
+            throw new BizException(BizCodeEnum.CODE_CAPTCHA_ERROR.getCode(), "图形验证码错误");
         }
 
         // 验证通过后删除验证码

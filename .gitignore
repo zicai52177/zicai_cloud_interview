@@ -15,7 +15,7 @@ build/
 *.iml
 *.ipr
 
-# Qoder 文件夹（你要求新增的）
+# Qoder 文件夹
 .qoder/
 
 # Eclipse

@@ -1,0 +1,16 @@
+package net.zicai.service;
+
+import net.zicai.controller.req.SendCheckCodeReq;
+import net.zicai.util.JsonData;
+
+/**
+* @author 王镝
+* @date 20260416 
+**/
+
+
+public interface AccountService {
+
+    JsonData sendCheckCode(SendCheckCodeReq req);
+
+}

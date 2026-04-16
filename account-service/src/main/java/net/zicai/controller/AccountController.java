@@ -1,13 +1,16 @@
 package net.zicai.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import net.zicai.controller.req.SendCheckCodeReq;
+import net.zicai.service.AccountService;
 import net.zicai.util.CaptchaUtil;
+import net.zicai.util.JsonData;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author 王镝
@@ -22,6 +25,7 @@ public class AccountController {
 
     private final CaptchaUtil captchaUtil;
 
+    private final AccountService accountService;
     /**
      * 获取图形验证码
      */
@@ -29,6 +33,18 @@ public class AccountController {
     public byte[] captcha(@RequestParam(value = "identifier",required = true) String identifier,
                           @RequestParam(value = "type",required = true) String type) {
         return captchaUtil.generateCaptchaImage(identifier, type);
+    }
+
+    /**
+     * 发送短信验证码
+     */
+    @PostMapping("send_check_code")
+    @Operation(summary = "发送短信验证码",
+            description = "需要先输入图形验证码,然后发送短信验证码用于登录或注册")
+    public JsonData sendCheckCode(
+            @Parameter(description = "发送短信请求参数", required = true)
+            @Valid @RequestBody SendCheckCodeReq req) {
+        return accountService.sendCheckCode(req);
     }
 
 }

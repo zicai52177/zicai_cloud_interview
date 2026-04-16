@@ -30,7 +30,7 @@ public class SmsTest {
      * 阿里云 AppCode
      * 请替换为你的真实 AppCode
      */
-    private static final String APPCODE = "551504ffe65b492cadbe7297a9cc669e";
+    private static final String APPCODE = APPCODE;
 
     /**
      * 短信签名ID

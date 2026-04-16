@@ -32,6 +32,12 @@ public class BizException extends RuntimeException {
         this.msg = bizCodeEnum.getMessage();
     }
 
+    public BizException(int code, String msg){
+        super(msg);
+        this.code = code;
+        this.msg = msg;
+    }
+
     public int getCode() {
         return code;
     }
