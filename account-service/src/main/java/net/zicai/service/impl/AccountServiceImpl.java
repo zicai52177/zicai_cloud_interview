@@ -1,17 +1,23 @@
 package net.zicai.service.impl;
 
 import com.alibaba.cloud.commons.lang.StringUtils;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
+import net.zicai.DTO.AccountLoginResultDTO;
 import net.zicai.config.RedisKeyManager;
 import net.zicai.config.SmsClient;
+import net.zicai.controller.req.AccountLoginReq;
 import net.zicai.controller.req.SendCheckCodeReq;
+import net.zicai.dto.AccountDTO;
 import net.zicai.dto.SmsDTO;
+import net.zicai.enums.AccountRoleEnum;
 import net.zicai.enums.BizCodeEnum;
+import net.zicai.enums.StatusEnum;
+import net.zicai.exception.BizException;
+import net.zicai.mapper.AccountMapper;
+import net.zicai.model.AccountDO;
 import net.zicai.service.AccountService;
-import net.zicai.util.CaptchaUtil;
-import net.zicai.util.CommonUtil;
-import net.zicai.util.JsonData;
-import net.zicai.util.JsonUtil;
+import net.zicai.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -38,6 +44,8 @@ public class AccountServiceImpl implements AccountService {
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private SmsClient smsClient;
+    @Autowired
+    private AccountMapper accountMapper;
 
     @Override
     public JsonData sendCheckCode(SendCheckCodeReq req) {
@@ -47,7 +55,7 @@ public class AccountServiceImpl implements AccountService {
         captchaUtil.verifyCaptcha(req.getIdentifier(), req.getCaptcha(), req.getType());
 
         // 2. 判断是否60秒内重复发送
-        String cacheKey = String.format(RedisKeyManager.CHECK_CODE_KEY, req.getIdentifier(), req.getType());
+        String cacheKey = String.format(RedisKeyManager.CHECK_CODE_KEY, req.getType(),req.getIdentifier());
         String cacheValue = stringRedisTemplate.opsForValue().get(cacheKey);
         if (StringUtils.isNotBlank(cacheValue)) {
             String[] parts = cacheValue.split("_");
@@ -74,6 +82,63 @@ public class AccountServiceImpl implements AccountService {
 
         log.error("接收号码格式不正确, identifier:{}", req.getIdentifier());
         return JsonData.buildResult(BizCodeEnum.CODE_TO_ERROR);
+    }
+
+    /**
+     * 1 验证短信验证码
+     * 2 查询用户唯一标识是否存在数据库
+     * 生成token
+     * @param req
+     * @return
+     */
+    @Override
+    public AccountLoginResultDTO login(AccountLoginReq req) {
+
+        //校验短信验证码
+        boolean verifyResult = verifyIdentifierCode(req.getIdentifier(),req.getCheckCode(),req.getType());
+        if (!verifyResult) {
+            throw new BizException(BizCodeEnum.SMS_CODE_ERROR);
+
+        }
+
+        //查询数据库
+        AccountDO accountDO = accountMapper.selectOne(new LambdaQueryWrapper<AccountDO>()
+                .eq(AccountDO::getStatus, StatusEnum.ON)
+                .eq(AccountDO::getEmail,req.getIdentifier()).or().eq(AccountDO::getPhone,req.getIdentifier()));
+        if (accountDO == null) {
+            //用户不存在，注册
+            boolean isPhone = CommonUtil.isPhone(req.getIdentifier());
+            AccountDO build = AccountDO.builder().role(AccountRoleEnum.COMMON.name()).username("user_"+req.getIdentifier()).build();
+            if (isPhone) {
+                build.setPhone(req.getIdentifier());
+            }else{
+                build.setEmail(req.getIdentifier());
+            }
+            accountMapper.insert(build);
+            log.info("用户注册成功：{}", build);
+        }
+
+        AccountDTO accountDTO = SpringBeanUtil.copyProperties(accountDO, AccountDTO.class);
+        //生成token
+        String loginJWT = JwtUtil.geneTenantAccountLoginJWT(accountDTO);
+
+        return AccountLoginResultDTO.builder().success(true).token(loginJWT).accountDTO(accountDTO).build();
+    }
+
+    private boolean verifyIdentifierCode(String identifier, String checkCode, String type) {
+        String cacheKey = String.format(RedisKeyManager.CHECK_CODE_KEY, type, identifier);
+        String cacheValue = stringRedisTemplate.opsForValue().get(cacheKey);
+        if (StringUtils.isNotBlank(cacheValue)) {
+            String[] parts = cacheValue.split("_");
+            if (parts.length >= 2) {
+                String cacheCode = parts[0];
+                if (cacheCode.equals(checkCode)) {
+                    stringRedisTemplate.delete(cacheKey);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

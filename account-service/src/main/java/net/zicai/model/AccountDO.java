@@ -7,8 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.util.Date;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * <p>
@@ -22,6 +21,9 @@ import lombok.Setter;
 @Setter
 @TableName("account")
 @Schema(name = "AccountDO", description = "用户表，支持微信登录")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class AccountDO implements Serializable {
 
     private static final long serialVersionUID = 1L;

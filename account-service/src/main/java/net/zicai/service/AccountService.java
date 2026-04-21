@@ -1,5 +1,7 @@
 package net.zicai.service;
 
+import net.zicai.DTO.AccountLoginResultDTO;
+import net.zicai.controller.req.AccountLoginReq;
 import net.zicai.controller.req.SendCheckCodeReq;
 import net.zicai.util.JsonData;
 
@@ -13,4 +15,5 @@ public interface AccountService {
 
     JsonData sendCheckCode(SendCheckCodeReq req);
 
+    AccountLoginResultDTO login(AccountLoginReq req);
 }

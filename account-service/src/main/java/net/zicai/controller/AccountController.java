@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import net.zicai.DTO.AccountLoginResultDTO;
+import net.zicai.controller.req.AccountLoginReq;
 import net.zicai.controller.req.SendCheckCodeReq;
 import net.zicai.service.AccountService;
 import net.zicai.util.CaptchaUtil;
@@ -45,6 +47,21 @@ public class AccountController {
             @Parameter(description = "发送短信请求参数", required = true)
             @Valid @RequestBody SendCheckCodeReq req) {
         return accountService.sendCheckCode(req);
+    }
+
+    /**
+     *  登录接口
+     */
+    @PostMapping("login")
+    @Operation(
+            summary = "租户账号登录",
+            description = "通过手机号和短信验证码登录，返回JWT Token和用户信息"
+    )
+    public JsonData login(
+            @Parameter(description = "登录请求参数", required = true)
+            @RequestBody AccountLoginReq req) {
+        AccountLoginResultDTO result = accountService.login(req);
+        return JsonData.buildSuccess(result);
     }
 
 }
