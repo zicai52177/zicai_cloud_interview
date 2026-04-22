@@ -1,5 +1,6 @@
 package net.zicai.controller;
 
+import io.jsonwebtoken.Claims;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -8,9 +9,13 @@ import lombok.RequiredArgsConstructor;
 import net.zicai.DTO.AccountLoginResultDTO;
 import net.zicai.controller.req.AccountLoginReq;
 import net.zicai.controller.req.SendCheckCodeReq;
+import net.zicai.dto.AccountDTO;
+import net.zicai.enums.BizCodeEnum;
+import net.zicai.exception.BizException;
 import net.zicai.service.AccountService;
 import net.zicai.util.CaptchaUtil;
 import net.zicai.util.JsonData;
+import net.zicai.util.JwtUtil;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -62,6 +67,16 @@ public class AccountController {
             @RequestBody AccountLoginReq req) {
         AccountLoginResultDTO result = accountService.login(req);
         return JsonData.buildSuccess(result);
+    }
+
+    /**
+     * 查询个人信息
+     */
+    @GetMapping("detail")
+    @Operation(summary = "查询个人信息", description = "根据Token查询当前登录用户信息")
+    public JsonData detail() {
+        AccountDTO accountDTO = accountService.findById();
+        return JsonData.buildSuccess(accountDTO);
     }
 
 }

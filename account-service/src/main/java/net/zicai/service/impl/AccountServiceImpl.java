@@ -14,6 +14,7 @@ import net.zicai.enums.AccountRoleEnum;
 import net.zicai.enums.BizCodeEnum;
 import net.zicai.enums.StatusEnum;
 import net.zicai.exception.BizException;
+import net.zicai.interceptor.AccountLoginInterceptor;
 import net.zicai.mapper.AccountMapper;
 import net.zicai.model.AccountDO;
 import net.zicai.service.AccountService;
@@ -89,7 +90,7 @@ public class AccountServiceImpl implements AccountService {
      * 2 查询用户唯一标识是否存在数据库
      * 生成token
      * @param req
-     * @return
+     * @return AccountLoginResultDTO
      */
     @Override
     public AccountLoginResultDTO login(AccountLoginReq req) {
@@ -108,14 +109,14 @@ public class AccountServiceImpl implements AccountService {
         if (accountDO == null) {
             //用户不存在，注册
             boolean isPhone = CommonUtil.isPhone(req.getIdentifier());
-            AccountDO build = AccountDO.builder().role(AccountRoleEnum.COMMON.name()).username("user_"+req.getIdentifier()).build();
+            accountDO = AccountDO.builder().role(AccountRoleEnum.COMMON.name()).username("user_"+req.getIdentifier()).build();
             if (isPhone) {
-                build.setPhone(req.getIdentifier());
+                accountDO.setPhone(req.getIdentifier());
             }else{
-                build.setEmail(req.getIdentifier());
+                accountDO.setEmail(req.getIdentifier());
             }
-            accountMapper.insert(build);
-            log.info("用户注册成功：{}", build);
+            accountMapper.insert(accountDO);
+            log.info("用户注册成功：{}", accountDO);
         }
 
         AccountDTO accountDTO = SpringBeanUtil.copyProperties(accountDO, AccountDTO.class);
@@ -125,6 +126,20 @@ public class AccountServiceImpl implements AccountService {
         return AccountLoginResultDTO.builder().success(true).token(loginJWT).accountDTO(accountDTO).build();
     }
 
+    @Override
+    public AccountDTO findById() {
+        AccountDTO accountDTO = AccountLoginInterceptor.threadLocal.get();
+        AccountDO accountDO = accountMapper.selectOne(new LambdaQueryWrapper<AccountDO>().eq(AccountDO::getId, accountDTO.getId()));
+        if (accountDO == null) {
+            log.info("用户不存在：{}",accountDTO);
+            throw new BizException(BizCodeEnum.ACCOUNT_UNREGISTER);
+        }
+        return SpringBeanUtil.copyProperties(accountDO, AccountDTO.class);
+    }
+
+    /**
+     * 判断验证码
+     */
     private boolean verifyIdentifierCode(String identifier, String checkCode, String type) {
         String cacheKey = String.format(RedisKeyManager.CHECK_CODE_KEY, type, identifier);
         String cacheValue = stringRedisTemplate.opsForValue().get(cacheKey);
