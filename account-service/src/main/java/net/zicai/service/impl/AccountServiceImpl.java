@@ -4,6 +4,8 @@ import com.alibaba.cloud.commons.lang.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import net.zicai.DTO.AccountLoginResultDTO;
+import net.zicai.Service.FileService;
+import net.zicai.Service.OssService;
 import net.zicai.config.RedisKeyManager;
 import net.zicai.config.SmsClient;
 import net.zicai.controller.req.AccountLoginReq;
@@ -23,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -47,6 +50,8 @@ public class AccountServiceImpl implements AccountService {
     private SmsClient smsClient;
     @Autowired
     private AccountMapper accountMapper;
+    @Autowired
+    private FileService fileService;
 
     @Override
     public JsonData sendCheckCode(SendCheckCodeReq req) {
@@ -135,6 +140,34 @@ public class AccountServiceImpl implements AccountService {
             throw new BizException(BizCodeEnum.ACCOUNT_UNREGISTER);
         }
         return SpringBeanUtil.copyProperties(accountDO, AccountDTO.class);
+    }
+
+    /**
+     * 上传头像
+     * @param file
+     * @return
+     */
+    @Override
+    public JsonData uploadAvatar(MultipartFile file) {
+        //获取用户信息
+        AccountDTO accountDTO = AccountLoginInterceptor.threadLocal.get();
+        Long accountId = accountDTO.getId();
+        //调用上传头像接口
+        JsonData uploadResult = fileService.uploadPublicFile(file);
+        if(uploadResult.getCode()!= 0){
+            log.error("文件上传错误,accountId:{}",accountId);
+            return JsonData.buildResult(BizCodeEnum.FILE_UPLOAD_USER_IMG_FAIL);
+        }
+        //获取上传后的Url
+        Map<String,Object> resultData=  (Map<String,Object>)uploadResult.getData();
+        String fileUrl = resultData.get("Url").toString();
+        log.info("文件上传成功，url:{}",fileUrl);
+        //更新数据库
+        int updated = accountMapper.update(AccountDO.builder().headImg(fileUrl).build(),new LambdaQueryWrapper<AccountDO>().eq(AccountDO::getId,accountId));
+        if(updated <=0 ){
+            log.error("更新用户头像失败，用户ID：{}",accountId);
+        }
+        return JsonData.buildSuccess(fileUrl);
     }
 
     /**

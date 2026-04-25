@@ -1,4 +1,4 @@
-package net.zicai.service;
+package net.zicai.Service;
 
 /**
 * @author 王镝

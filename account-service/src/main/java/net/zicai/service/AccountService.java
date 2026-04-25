@@ -5,6 +5,7 @@ import net.zicai.controller.req.AccountLoginReq;
 import net.zicai.controller.req.SendCheckCodeReq;
 import net.zicai.dto.AccountDTO;
 import net.zicai.util.JsonData;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
 * @author 王镝
@@ -19,4 +20,6 @@ public interface AccountService {
     AccountLoginResultDTO login(AccountLoginReq req);
 
     AccountDTO findById();
+
+    JsonData uploadAvatar(MultipartFile file);
 }

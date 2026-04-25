@@ -1,10 +1,14 @@
 package net.zicai.test;
 
+import com.aliyun.oss.model.VoidResult;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import net.zicai.Service.OssService;
+import net.zicai.config.OssClientManager;
 import net.zicai.config.SmsClient;
 import net.zicai.dto.SmsDTO;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /**
@@ -16,56 +20,43 @@ import org.springframework.boot.test.context.SpringBootTest;
  */
 @Slf4j
 @SpringBootTest
-public class SmsTest {
+public class OssManagerTest {
 
-    @Resource
-    private SmsClient smsClient;
+    @Autowired
+    private  OssClientManager ossClientManager;
 
-    /**
-     * 测试发送短信
-     */
+    @Autowired
+    private OssService ossService;
+
+
     @Test
-    public void testSendSms() {
-        // 目标手机号
-        String mobile = "18241862212";
+    public void testDeleteFile(){
 
-        // 短信模板参数
-        // **code**: 验证码, **minute**: 有效期（分钟）
-        String param = "**code**:521,**minute**:5";
+        //获取文件Url
+        String fileUrl = "https://zccloud-interview-pub.oss-cn-beijing.aliyuncs.com/%E7%AE%80%E5%8E%861.pdf";
 
-        // 构建短信DTO
-        SmsDTO smsDTO = SmsDTO.builder()
-                .mobile(mobile)
-                .param(param)
-                .build();
+        //判断bucket
+        OssClientManager.BucketClient bucket = ossClientManager.resolveByUrl(fileUrl);
+        //获取fileKey
+        String fileKey = ossService.extractFileKey(fileUrl);
+        //删除
+        bucket.getClient().deleteObject(bucket.getBucketName(), fileKey);
+        log.info("删除文成功 fileUrl：{}",fileUrl);
+    }
 
-        // 发送短信
-        String result = smsClient.sendSms(smsDTO);
+    @Test
+    public void testGenerateUrl(){
 
-        // 输出结果
-        if (result != null) {
-            log.info("短信发送成功，响应结果: {}", result);
-        } else {
-            log.error("短信发送失败");
+        String fileUrl = "https://zccloud-interview-pri.oss-cn-beijing.aliyuncs.com/.pdf";
+
+        OssClientManager.BucketClient bucketClient = ossClientManager.resolveByUrl(fileUrl);
+
+        if(bucketClient.isPublic()){
+            log.info(fileUrl);
+        }else{
+            log.info(ossService.generatePreviewUrl(fileUrl));
         }
+
     }
 
-    /**
-     * 测试发送验证码短信（便捷方法）
-     */
-    @Test
-    public void testSendVerifyCode() {
-        String mobile = "18241862212";
-        String code = "123456";
-        int minute = 5;
-
-        String param = String.format("**code**:%s,**minute**:%d", code, minute);
-        SmsDTO smsDTO = SmsDTO.builder()
-                .mobile(mobile)
-                .param(param)
-                .build();
-
-        String result = smsClient.sendSms(smsDTO);
-        log.info("验证码短信发送结果: {}", result);
-    }
 }

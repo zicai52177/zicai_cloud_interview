@@ -18,6 +18,7 @@ import net.zicai.util.JsonData;
 import net.zicai.util.JwtUtil;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * @author 王镝
@@ -77,6 +78,20 @@ public class AccountController {
     public JsonData detail() {
         AccountDTO accountDTO = accountService.findById();
         return JsonData.buildSuccess(accountDTO);
+    }
+
+    /**
+     * 上传用户头像
+     */
+    @PostMapping(value = "/avatar",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(
+            summary = "上传头像",
+            description = "上传头像接口，返回可访问Url"
+    )
+    public JsonData avatar(
+            @Parameter(description = "上传文件", required = true)
+            @RequestPart("file") MultipartFile file) {
+        return accountService.uploadAvatar(file);
     }
 
 }
