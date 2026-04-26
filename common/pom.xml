@@ -184,6 +184,11 @@
             <artifactId>jsoup</artifactId>
             <version>1.17.1</version>
         </dependency>
+        <!-- Dotenv -->
+        <dependency>
+            <groupId>io.github.cdimascio</groupId>
+            <artifactId>dotenv-java</artifactId>
+        </dependency>
 
 
     </dependencies>

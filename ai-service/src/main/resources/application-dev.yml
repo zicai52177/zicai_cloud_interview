@@ -4,16 +4,16 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 124.223.30.172:8848
-        username: nacos
-        password: nacos123
+        server-addr: ${NACOS_SERVER}
+        username: ${NACOS_USER}
+        password: ${NACOS_PASSWORD}
 
   rabbitmq:
-    host: 124.223.30.172
+    host: ${RABBITMQ_SERVER}
     port: 5672
     virtual-host: /
-    username: root
-    password: abc123456
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
     listener:
       simple:
         acknowledge-mode: manual
@@ -21,9 +21,9 @@ spring:
   # db
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://124.223.30.172:3306/ai_db?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: root
-    password: Abc123456.
+    url: jdbc:mysql://${MYSQL_SERVER}:3306/ai_db?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
     hikari:
       max-lifetime: 300000         # 5分钟，单位毫秒
       connection-timeout: 30000
@@ -38,9 +38,9 @@ spring:
   #  redis配置
   data:
     redis:
-      host: 124.223.30.172
+      host: ${REDIS_SERVER}
       port: 6300
-      password: abc123456
+      password: ${REDIS_PASSWORD}
 #  锁配置 防止不同环境争抢一把锁
 lock:
   prefix-key: dev
