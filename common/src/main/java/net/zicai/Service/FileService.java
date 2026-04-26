@@ -43,4 +43,9 @@ public interface FileService {
      */
     JsonData uploadSecureFile(MultipartFile file);
 
+    /**
+     * 删除文件
+     */
+    boolean deleteOldAvatar(String fileUrl);
+
 }

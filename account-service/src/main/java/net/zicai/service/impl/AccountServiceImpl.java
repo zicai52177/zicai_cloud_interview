@@ -52,8 +52,6 @@ public class AccountServiceImpl implements AccountService {
     private AccountMapper accountMapper;
     @Autowired
     private FileService fileService;
-    @Autowired
-    private OssService ossService;
 
     @Override
     public JsonData sendCheckCode(SendCheckCodeReq req) {
@@ -158,7 +156,7 @@ public class AccountServiceImpl implements AccountService {
         //查询数据库获取当前头像URL，用于删除旧头像
         AccountDO currentAccount = accountMapper.selectById(accountId);
         if (currentAccount != null && currentAccount.getHeadImg() != null && !currentAccount.getHeadImg().contains("default")) {
-            ossService.deleteFile(currentAccount.getHeadImg());
+            fileService.deleteOldAvatar(currentAccount.getHeadImg());
             log.info("旧头像删除成功, accountId:{}, oldHeadImg:{}", accountId, currentAccount.getHeadImg());
         }
 

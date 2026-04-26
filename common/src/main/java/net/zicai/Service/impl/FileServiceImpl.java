@@ -55,7 +55,10 @@ public class FileServiceImpl implements FileService {
         String ResultUrl = uploadFileToSecureBucket(file, DEFAULT_SECURE_FILE_FOLDER);
         return JsonData.buildSuccess(Map.of("Url",ResultUrl));
     }
-
+    @Override
+    public boolean deleteOldAvatar(String fileUrl) {
+        return ossService.deleteFile(fileUrl);
+    }
     private String uploadFileToPublicBucket(MultipartFile file,String folder) {
         if(validate(file)){
             String fileUrl = ossService.uploadPublicFile(file,folder);
@@ -72,6 +75,8 @@ public class FileServiceImpl implements FileService {
         }
             return  null;
     }
+
+
 
     private boolean validate(MultipartFile file) {
         if(file == null || file.isEmpty()){
