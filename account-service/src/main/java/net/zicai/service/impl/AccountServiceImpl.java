@@ -52,6 +52,8 @@ public class AccountServiceImpl implements AccountService {
     private AccountMapper accountMapper;
     @Autowired
     private FileService fileService;
+    @Autowired
+    private OssService ossService;
 
     @Override
     public JsonData sendCheckCode(SendCheckCodeReq req) {
@@ -152,6 +154,14 @@ public class AccountServiceImpl implements AccountService {
         //获取用户信息
         AccountDTO accountDTO = AccountLoginInterceptor.threadLocal.get();
         Long accountId = accountDTO.getId();
+
+        //查询数据库获取当前头像URL，用于删除旧头像
+        AccountDO currentAccount = accountMapper.selectById(accountId);
+        if (currentAccount != null && currentAccount.getHeadImg() != null && !currentAccount.getHeadImg().contains("default")) {
+            ossService.deleteFile(currentAccount.getHeadImg());
+            log.info("旧头像删除成功, accountId:{}, oldHeadImg:{}", accountId, currentAccount.getHeadImg());
+        }
+
         //调用上传头像接口
         JsonData uploadResult = fileService.uploadPublicFile(file);
         if(uploadResult.getCode()!= 0){
