@@ -77,6 +77,11 @@ public enum BizCodeEnum {
     PRODUCT_NOT_EXIST(220001, "商品不存在"),
 
     /**
+     * 简历相关错误码
+     */
+    RESUME_NOT_EXIST(210001, "简历不存在"),
+
+    /**
      * Banner相关错误码
      */
     BANNER_NOT_EXIST(220002, "Banner不存在"),

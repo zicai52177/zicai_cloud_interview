@@ -7,7 +7,14 @@ spring:
         server-addr: ${NACOS_SERVER}
         username: ${NACOS_USER}
         password: ${NACOS_PASSWORD}
-
+  ai:
+    dashscope:
+      api-key: ${ALIBABA_BAILIAN_KEY}
+      chat:
+        options:
+          model: qwen-max        # 模型选择，可选 qwen-plus、qwen-turbo
+          temperature: 0.7       # 创造性（0-1，越高越随机）
+          max-tokens: 2048       # 最大输出 Token 数
   rabbitmq:
     host: ${RABBITMQ_SERVER}
     port: 5672
@@ -52,6 +59,19 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
+aliyun:
+  oss:
+    access-key-id: ${OSS_ACCESS_KEY_ID}
+    access-key-secret: ${OSS_ACCESS_KEY_SECRET}
+
+    secure-endpoint: oss-cn-beijing.aliyuncs.com
+    secure-bucket-name: zccloud-interview-pri
+    secure-domain: https://zccloud-interview-pri.oss-cn-beijing.aliyuncs.com/
+
+    public-endpoint: oss-cn-beijing.aliyuncs.com
+    public-bucket-name: zccloud-interview-pub
+    public-domain: https://zccloud-interview-pub.oss-cn-beijing.aliyuncs.com/
+
 knife4j:
   enable: false
 
@@ -64,3 +84,10 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
+
+# SearXNG 搜索引擎配置
+searxng:
+  base-url: #{SEARXNG_SERVER} # SearXNG 服务地址
+  format: json                          # 返回格式，必须为 json
+  language: zh                          # 搜索语言
+  engines: bing,baidu                        # 搜索引擎（多个用逗号分隔，如：bing,google）

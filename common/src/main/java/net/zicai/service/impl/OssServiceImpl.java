@@ -1,15 +1,13 @@
-package net.zicai.Service.impl;
+package net.zicai.service.impl;
 
 import com.alibaba.cloud.commons.lang.StringUtils;
 import com.aliyun.oss.HttpMethod;
 import com.aliyun.oss.model.GeneratePresignedUrlRequest;
 import com.aliyun.oss.model.ObjectMetadata;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import net.zicai.Service.OssService;
+import net.zicai.service.OssService;
 import net.zicai.config.OssClientManager;
 import net.zicai.util.FileUtil;
-import net.zicai.util.HttpUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

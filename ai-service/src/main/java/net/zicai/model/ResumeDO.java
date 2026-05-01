@@ -7,12 +7,11 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.util.Date;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author 紫菜,
@@ -22,11 +21,14 @@ import lombok.Setter;
 @Setter
 @TableName("resume")
 @Schema(name = "ResumeDO", description = "")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ResumeDO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-      @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
     @TableField("account_id")

@@ -1,12 +1,8 @@
 package net.zicai.test;
 
-import com.aliyun.oss.model.VoidResult;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import net.zicai.Service.OssService;
+import net.zicai.service.OssService;
 import net.zicai.config.OssClientManager;
-import net.zicai.config.SmsClient;
-import net.zicai.dto.SmsDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

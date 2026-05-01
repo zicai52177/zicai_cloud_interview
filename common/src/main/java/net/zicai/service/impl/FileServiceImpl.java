@@ -1,8 +1,8 @@
-package net.zicai.Service.impl;
+package net.zicai.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import net.zicai.Service.FileService;
-import net.zicai.Service.OssService;
+import net.zicai.service.FileService;
+import net.zicai.service.OssService;
 import net.zicai.config.OssClientManager;
 import net.zicai.util.JsonData;
 import org.springframework.beans.factory.annotation.Autowired;

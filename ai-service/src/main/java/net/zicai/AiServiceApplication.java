@@ -1,5 +1,6 @@
 package net.zicai;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.mybatis.spring.annotation.MapperScan;
@@ -23,7 +24,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class AiServiceApplication {
     @SneakyThrows
     public static void main(String[] args) {
-
+        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+        dotenv.entries().forEach((entry) -> {System.setProperty(entry.getKey(),entry.getValue());});
         SpringApplication.run(AiServiceApplication.class, args);
 
     }
