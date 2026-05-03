@@ -1,4 +1,5 @@
 package net.zicai.feign;
+<<<<<<< HEAD
 
 /**
  * @author wangdi
@@ -47,3 +48,12 @@ public interface AccountBenefitFeign {
     @PostMapping("/api/v1/account/benefit/task/updateStatus")
     JsonData updateTaskStatus(@RequestBody BenefitTaskUpdateReq req);
 }
+=======
+/**
+ * @author wangdi
+ * @date 2026/5/2 15:01
+ * @description 
+ */
+public interface AccountBenefitFeign {
+}
+>>>>>>> b7821a595bc942521dcd7b498f008f953d501850

@@ -3,6 +3,7 @@ package net.zicai.req;
 /**
  * @author wangdi
  * @date 2026/5/2 13:56
+<<<<<<< HEAD
  * @description
  */
 
@@ -44,3 +45,9 @@ public class BenefitTaskUpdateReq implements Serializable {
     @Schema(description = "失败原因（取消时填写）")
     private String failReason;
 }
+=======
+ * @description 
+ */
+public class BenefitTaskUpdateReq {
+}
+>>>>>>> b7821a595bc942521dcd7b498f008f953d501850

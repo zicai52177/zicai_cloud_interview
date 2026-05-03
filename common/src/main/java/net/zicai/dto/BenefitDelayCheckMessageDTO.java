@@ -3,6 +3,7 @@ package net.zicai.dto;
 /**
  * @author wangdi
  * @date 2026/5/2 13:54
+<<<<<<< HEAD
  * @description
  */
 
@@ -36,3 +37,9 @@ public class BenefitDelayCheckMessageDTO implements Serializable {
     @Schema(description = "检查级别：1-第1次检查(1分钟)，2-第2次检查(5分钟)")
     private Integer checkLevel;
 }
+=======
+ * @description 
+ */
+public class BenefitDelayCheckMessageDTO {
+}
+>>>>>>> b7821a595bc942521dcd7b498f008f953d501850
