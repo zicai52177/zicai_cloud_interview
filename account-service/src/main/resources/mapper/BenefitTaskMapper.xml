@@ -7,6 +7,7 @@
         <id column="id" property="id" />
         <result column="account_id" property="accountId" />
         <result column="account_benefit_id" property="accountBenefitId" />
+        <result column="benefit_code" property="benefitCode" />
         <result column="use_times" property="useTimes" />
         <result column="business_id" property="businessId" />
         <result column="message_id" property="messageId" />
@@ -17,7 +18,7 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, account_id, account_benefit_id, use_times, business_id, message_id, lock_state, gmt_create, gmt_modified
+        id, account_id, account_benefit_id,benefit_code, use_times, business_id, message_id, lock_state, gmt_create, gmt_modified
     </sql>
 
 </mapper>

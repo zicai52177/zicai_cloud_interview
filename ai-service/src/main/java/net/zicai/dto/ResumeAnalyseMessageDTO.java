@@ -1,9 +1,23 @@
 package net.zicai.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
+
 /**
  * @author wangdi
  * @date 2026/5/3 17:24
- * @description 
+ * @description
  */
+@Component
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ResumeAnalyseMessageDTO {
+
+    private Long resumeId;
+    private Long accountId;
+    private String messageId;
+
 }

@@ -4,7 +4,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.zicai.dto.AccountDTO;
 import net.zicai.dto.ResumeDTO;
+import net.zicai.enums.BenefitEnum;
+import net.zicai.interceptor.AccountLoginInterceptor;
+import net.zicai.req.BenefitCheckReq;
 import net.zicai.service.ResumeService;
 import net.zicai.util.JsonData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +77,15 @@ public class ResumeController {
     @GetMapping("/analyse")
     @Operation(summary = "简历解析")
     public JsonData analyse(@RequestParam("id") Long id) {
-        return resumeService.analyse(id);
+        AccountDTO accountDTO = AccountLoginInterceptor.threadLocal.get();
+        BenefitCheckReq benefitCheckReq = BenefitCheckReq.builder()
+                .benefitCode(BenefitEnum.RESUME_ANALYSE.name())
+                .accountId(accountDTO.getId())
+                .businessId(id.toString())
+                .count(1)
+                .build();
+
+        return resumeService.analyse(benefitCheckReq);
     }
 
 }

@@ -1,6 +1,7 @@
 package net.zicai.service;
 
 import net.zicai.dto.ResumeDTO;
+import net.zicai.req.BenefitCheckReq;
 import net.zicai.util.JsonData;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,5 +39,5 @@ public interface ResumeService {
 
     JsonData getPreviewUrl(Long id);
 
-    JsonData analyse(Long id);
+    JsonData analyse(BenefitCheckReq benefitCheckReq);
 }

@@ -3,15 +3,20 @@ package net.zicai.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import net.zicai.dto.AccountDTO;
+import net.zicai.dto.BenefitCheckResultDTO;
 import net.zicai.dto.ResumeDTO;
 import net.zicai.enums.ResumeStatus;
 import net.zicai.enums.BizCodeEnum;
 import net.zicai.exception.BizException;
+import net.zicai.feign.AccountBenefitFeign;
 import net.zicai.interceptor.AccountLoginInterceptor;
 import net.zicai.mapper.ResumeMapper;
 import net.zicai.model.ResumeDO;
+import net.zicai.req.BenefitCheckReq;
 import net.zicai.service.OssService;
 import net.zicai.service.ResumeService;
+import net.zicai.strategy.BenefitMessageStrategy;
+import net.zicai.strategy.BenefitMessageStrategyFactory;
 import net.zicai.util.FileUtil;
 import net.zicai.util.JsonData;
 import net.zicai.util.SpringBeanUtil;
@@ -28,7 +33,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -46,6 +53,10 @@ public class ResumeServiceImpl implements ResumeService {
     private OssService ossService;
     @Autowired
     private AccountLoginInterceptor accountLoginInterceptor;
+    @Autowired
+    private AccountBenefitFeign accountBenefitFeign;
+    @Autowired
+    private BenefitMessageStrategyFactory benefitMessageStrategyFactory;
 
     /**
      * 上传简历并解析
@@ -153,13 +164,39 @@ public class ResumeServiceImpl implements ResumeService {
     }
 
     @Override
-    public JsonData analyse(Long id) {
+    public JsonData analyse(BenefitCheckReq benefitCheckReq) {
         //查找简历
+        ResumeDO resumeDO = resumeMapper.selectOne(new LambdaQueryWrapper<ResumeDO>()
+                        .eq(ResumeDO::getId, benefitCheckReq.getBusinessId())
+                        .eq(ResumeDO::getAccountId, benefitCheckReq.getAccountId())
+        );
         //更新简历状态
+        resumeDO.setStatus(ResumeStatus.IN_PROCESS.name());
+        resumeMapper.updateById(resumeDO);
         //扣减权益
+        JsonData jsonData = accountBenefitFeign.checkAndDeductBenefit(benefitCheckReq);
+        if (jsonData.getCode() != 0) {
+            resumeDO.setStatus(ResumeStatus.UPLOADED.name());
+            resumeMapper.updateById(resumeDO);
+            return jsonData.buildResult(BizCodeEnum.BENEFIT_NOT_ENOUGH);
+        }
+        //扣减成功，获取AccountID
+        BenefitCheckResultDTO resultDTO = jsonData.getData(BenefitCheckResultDTO.class);
+        log.info("权益扣减成功，用户ID：{}", resultDTO.getMessageId());
         //发送MQ消息
-
-        return null;
+        try {
+            BenefitMessageStrategy strategy = benefitMessageStrategyFactory.getStrategy(resultDTO.getBenefitCode());
+            strategy.sendBusinessMessage(resultDTO.getMessageId(), resultDTO.getBusinessId(), benefitCheckReq.getAccountId());
+        } catch (Exception e) {
+            log.error("发送MQ消息失败", e);
+            // 不用抛异常，权益已经扣减，延迟检查机制会检查
+        }
+        //拼接结果
+        Map<String,Object> result = new HashMap<>();
+        result.put("resumeID",resultDTO.getMessageId());
+        result.put("status","Analysing");
+        result.put("message","简历正在分析中，请稍侯");
+        return JsonData.buildSuccess(result);
     }
 
     /**
