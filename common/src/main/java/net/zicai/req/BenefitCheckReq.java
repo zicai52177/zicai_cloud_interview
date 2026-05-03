@@ -3,7 +3,6 @@ package net.zicai.req;
 /**
  * @author wangdi
  * @date 2026/5/2 13:55
-<<<<<<< HEAD
  * @description
  */
 
@@ -36,9 +35,3 @@ public class BenefitCheckReq {
     private Integer count;
 
 }
-=======
- * @description 
- */
-public class BenefitCheckReq {
-}
->>>>>>> b7821a595bc942521dcd7b498f008f953d501850

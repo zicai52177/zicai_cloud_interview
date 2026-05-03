@@ -3,7 +3,6 @@ package net.zicai.dto;
 /**
  * @author wangdi
  * @date 2026/5/2 13:54
-<<<<<<< HEAD
  * @description
  */
 
@@ -37,9 +36,3 @@ public class ResumeAnalyseMessageDTO implements Serializable {
     @Schema(description = "消息ID（用于关联延迟检查）")
     private String messageId;
 }
-=======
- * @description 
- */
-public class ResumeAnalyseMessageDTO {
-}
->>>>>>> b7821a595bc942521dcd7b498f008f953d501850

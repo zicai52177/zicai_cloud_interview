@@ -1,6 +1,5 @@
 package net.zicai.enums;
 
-<<<<<<< HEAD
 /**
  * 权益任务状态枚举
  * 用于本地事务消息表的状态管理
@@ -79,7 +78,3 @@ public enum BenefitTaskStateEnum {
         return this == CANCEL;
     }
 }
-=======
-public enum BenefitTaskStateEnum {
-}
->>>>>>> b7821a595bc942521dcd7b498f008f953d501850

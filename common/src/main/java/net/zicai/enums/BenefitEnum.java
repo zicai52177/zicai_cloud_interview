@@ -1,7 +1,6 @@
 package net.zicai.enums;
 
 public enum BenefitEnum {
-<<<<<<< HEAD
     //AI简历分析
     RESUME_ANALYSE("AI简历分析"),
     //面试类型
@@ -18,6 +17,3 @@ public enum BenefitEnum {
         return title;
     }
 }
-=======
-}
->>>>>>> b7821a595bc942521dcd7b498f008f953d501850

@@ -3,7 +3,6 @@ package net.zicai.config;
 /**
  * @author wangdi
  * @date 2026/5/2 15:32
-<<<<<<< HEAD
  * @description
  */
 
@@ -86,9 +85,3 @@ public class InterviewEventMQConfig {
                 .with(INTERVIEW_CREATE_ROUTING_KEY);
     }
 }
-=======
- * @description 
- */
-public class InterviewEventMQConfig {
-}
->>>>>>> b7821a595bc942521dcd7b498f008f953d501850

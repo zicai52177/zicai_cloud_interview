@@ -3,7 +3,6 @@ package net.zicai.dto;
 /**
  * @author wangdi
  * @date 2026/5/2 13:53
-<<<<<<< HEAD
  * @description
  */
 
@@ -48,9 +47,3 @@ public class BenefitCheckResultDTO {
     @Schema(description = "错误信息")
     private String errorMessage;
 }
-=======
- * @description 
- */
-public class BenefitCheckResultDTO {
-}
->>>>>>> b7821a595bc942521dcd7b498f008f953d501850
