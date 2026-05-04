@@ -39,6 +39,9 @@ public class InterceptorConfig implements WebMvcConfigurer {
                         "/api/v1/product/benefits",
                         "/api/v1/product/package/detail",
                         "/api/v1/product/benefit/detail",
+                        //内部请求，不需要拦截（可以由网关配置禁止外部调用）
+                        "/api/v1/account/benefit/checkAndDeduct",
+                        "/api/v1/account/benefit/task/updateStatus",
                         // 支付回调接口（不需要登录）
                         "/api/v1/order/callback/wechat_pay",
                         "/api/v1/order/callback/alipay",

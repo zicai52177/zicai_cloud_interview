@@ -186,7 +186,7 @@ public class ResumeServiceImpl implements ResumeService {
         //发送MQ消息
         try {
             BenefitMessageStrategy strategy = benefitMessageStrategyFactory.getStrategy(resultDTO.getBenefitCode());
-            strategy.sendBusinessMessage(resultDTO.getMessageId(), resultDTO.getBusinessId(), benefitCheckReq.getAccountId());
+            strategy.sendBusinessMessage(resultDTO.getMessageId(), resultDTO.getBusinessId(), benefitCheckReq.getAccountId())  ;
         } catch (Exception e) {
             log.error("发送MQ消息失败", e);
             // 不用抛异常，权益已经扣减，延迟检查机制会检查
