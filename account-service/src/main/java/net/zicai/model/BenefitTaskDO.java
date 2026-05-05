@@ -42,7 +42,7 @@ public class BenefitTaskDO implements Serializable {
 
     @Schema(description = "权益编码")
     @TableField("benefit_code")
-    private Long benefitCode;
+    private String benefitCode;
 
     @Schema(description = "使用次数(扣减次数)")
     @TableField("use_times")

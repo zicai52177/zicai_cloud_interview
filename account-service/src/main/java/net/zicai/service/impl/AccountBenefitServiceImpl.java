@@ -57,8 +57,8 @@ public class AccountBenefitServiceImpl implements AccountBenefitService {
         List<AccountBenefitDO> accountBenefitDOS = accountBenefitMapper.selectList(new LambdaQueryWrapper<AccountBenefitDO>()
                 .eq(AccountBenefitDO::getAccountId, benefitCheckReq.getAccountId())
                 .eq(AccountBenefitDO::getBenefitCode, benefitCheckReq.getBenefitCode())
-                .eq(AccountBenefitDO::getRemainingCount, 0)
-                .eq(AccountBenefitDO::getEndTime, new Date())
+                .gt(AccountBenefitDO::getRemainingCount, 0)
+                .gt(AccountBenefitDO::getEndTime, new Date())
                 .orderByDesc(AccountBenefitDO::getEndTime)
         );
         if (accountBenefitDOS.isEmpty()){

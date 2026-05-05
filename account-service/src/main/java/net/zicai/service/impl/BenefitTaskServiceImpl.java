@@ -37,7 +37,7 @@ public class BenefitTaskServiceImpl implements BenefitTaskService {
         BenefitTaskDO task = BenefitTaskDO.builder()
                 .messageId(messageId)
                 .businessId(businessId)
-                .benefitCode(Long.valueOf(benefitCode))
+                .benefitCode(benefitCode)
                 .accountId(accountId)
                 .accountBenefitId(accountBenefitId)
                 .useTimes(useTimes)

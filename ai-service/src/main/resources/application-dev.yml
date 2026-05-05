@@ -15,6 +15,18 @@ spring:
           model: qwen-max        # 模型选择，可选 qwen-plus、qwen-turbo
           temperature: 0.7       # 创造性（0-1，越高越随机）
           max-tokens: 2048       # 最大输出 Token 数
+    mcp:
+      client:
+        enabled: true
+        type: SYNC
+        request-timeout: 300s
+        toolcallback:
+          enabled: true
+        # 使用Streamable HTTP连接（无状态，适配FC/Serverless环境）
+        streamable-http:
+          connections:
+            mcp-server:
+              url: ${MCP_SERVER_URL}/mcp
   rabbitmq:
     host: ${RABBITMQ_SERVER}
     port: 5672

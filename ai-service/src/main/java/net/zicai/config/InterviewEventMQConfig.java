@@ -10,6 +10,8 @@ import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -36,6 +38,15 @@ public class InterviewEventMQConfig {
     // ============ 面试创建队列 ============
     public static final String INTERVIEW_CREATE_QUEUE = "interview.create.queue";
     public static final String INTERVIEW_CREATE_ROUTING_KEY = "interview.create";
+
+    /**
+     * 使用JSON序列化，替代默认的Java序列化
+     * 解决Spring AMQP 3.x反序列化白名单安全问题
+     */
+    @Bean
+    public MessageConverter jackson2JsonMessageConverter() {
+        return new Jackson2JsonMessageConverter();
+    }
 
     /**
      * 主题交换机（支持通配符路由）
