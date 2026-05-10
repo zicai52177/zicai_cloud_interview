@@ -39,7 +39,7 @@ spring:
   data:
     redis:
       host: ${REDIS_SERVER}
-      port: 6300
+      port: 6379
       password: ${REDIS_PASSWORD}
 #  锁配置 防止不同环境争抢一把锁
 lock:
@@ -51,6 +51,12 @@ mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 短信配置
+sms:
+  app-code: ${SMS_APP_CODE}
+  sms-sign-id: 2e65b1bb3d054466b82f0c9d125465e2
+  template-id: 908e94ccf08b4476ba6c876d13f084ad
 
 knife4j:
   enable: false
@@ -64,3 +70,24 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
+
+aliyun:
+  oss:
+    access-key-id: ${OSS_ACCESS_KEY_ID}           # 访问密钥ID
+    access-key-secret: ${OSS_ACCESS_KEY_SECRET}      # 访问密钥Secret
+
+    secure-endpoint: oss-cn-beijing.aliyuncs.com    # 加密bucket访问域名
+    secure-bucket-name: zccloud-interview-pri          # 加密访问的存储桶
+    secure-domain: https://zccloud-interview-pri.oss-cn-beijing.aliyuncs.com/    # 加密访问的域名
+
+    public-endpoint: oss-cn-beijing.aliyuncs.com    # 公开bucket访问域名
+    public-bucket-name: zccloud-interview-pub         # 公开访问的存储桶（头像/题图）
+    public-domain: https://zccloud-interview-pub.oss-cn-beijing.aliyuncs.com/  # 公开访问域名
+
+wechat:
+  login:
+    app-id: wx8607439bff426835
+    app-secret: babae6d002449f1fae482cc0088e3bce
+    qr-code-expire-time: 120
+    login-state-expire-time: 300
+    token: zccloud_interview_test_2026
