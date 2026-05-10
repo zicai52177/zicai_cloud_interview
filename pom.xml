@@ -92,6 +92,13 @@
                 <scope>import</scope>
             </dependency>
 
+            <!-- 微信支付 SDK  聚合工程 -->
+            <dependency>
+                <groupId>com.github.wechatpay-apiv3</groupId>
+                <artifactId>wechatpay-java</artifactId>
+                <version>0.2.16</version>
+            </dependency>
+
             <!-- Spring Cloud -->
             <dependency>
                 <groupId>org.springframework.cloud</groupId>

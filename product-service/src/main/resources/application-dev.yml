@@ -91,3 +91,21 @@ wechat:
     qr-code-expire-time: 120
     login-state-expire-time: 300
     token: zccloud_interview_test_2026
+
+  pay:
+    #商户号
+    mch-id: 1727684712
+    #公众号APPID
+    app-id: wx731dc40c4097e341
+    #商户API证书序列号
+    cert-serial-no: 19EC4EA464F61B6C757882327E6F805FB700FEA9
+    #APIv3密钥
+    api-v3-key: Xdclass168Xdclass168Xdclass16888
+    #商户API证书私钥的存放路径
+    private-key-path: classpath:/cert/apiclient_key.pem
+    #微信支付公钥的存放路径
+    public-key-path: classpath:/cert/pub_key.pem
+    #微信支付公钥ID
+    public-key-id: PUB_KEY_ID_0117276847122026022500181903000200
+    #回调地址
+    notify-url: http://ybcc9fab.natappfree.cc/api/v1/order/callback/wechat_pay

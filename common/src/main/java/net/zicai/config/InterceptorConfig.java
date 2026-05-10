@@ -47,6 +47,7 @@ public class InterceptorConfig implements WebMvcConfigurer {
                         "/api/v1/order/callback/alipay",
                         // 静态资源
                         "/favicon.ico",
+                        "/api/v1/pay/test/native",
                         "/error")
                         .order(1);
                         // 优先级

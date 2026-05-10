@@ -1,9 +1,146 @@
 package net.zicai.util;
-
 /**
  * @author wangdi
  * @date 2026/5/10 17:43
- * @description 
+ * @description
  */
+import com.wechat.pay.java.core.RSAPublicKeyConfig;
+import com.wechat.pay.java.core.notification.NotificationParser;
+import com.wechat.pay.java.core.notification.RequestParam;
+import com.wechat.pay.java.service.payments.model.Transaction;
+import com.wechat.pay.java.service.payments.nativepay.NativePayService;
+import com.wechat.pay.java.service.payments.nativepay.model.Amount;
+import com.wechat.pay.java.service.payments.nativepay.model.CloseOrderRequest;
+import com.wechat.pay.java.service.payments.nativepay.model.PrepayRequest;
+import com.wechat.pay.java.service.payments.nativepay.model.PrepayResponse;
+import com.wechat.pay.java.service.payments.nativepay.model.QueryOrderByOutTradeNoRequest;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+import net.zicai.config.WechatPayConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+/**
+ * 微信支付工具类
+ * 采用微信支付公钥验签模式（RSAPublicKeyConfig），基于 wechatpay-java SDK
+ * <p>
+ * config / nativePayService / notificationParser 在 Bean 初始化时构建一次，常驻内存复用，
+ * 避免每次请求重复解析 RSA 密钥文件带来的性能开销。
+ * </p>
+ */
+@Slf4j
+@Component
 public class WechatPayUtil {
+
+    @Autowired
+    private WechatPayConfig wechatPayConfig;
+
+    /** 微信支付公钥模式配置，初始化后常驻 */
+    private RSAPublicKeyConfig config;
+
+    /** Native支付服务，线程安全可复用 */
+    private NativePayService nativePayService;
+
+    /** 回调通知解析器，线程安全可复用 */
+    private NotificationParser notificationParser;
+
+    /**
+     * Bean 初始化完成后构建微信支付所需对象
+     * WechatPayConfig#init() 已提前将 classpath 证书复制到临时目录并设置绝对路径
+     */
+    @PostConstruct
+    public void init() {
+        config = new RSAPublicKeyConfig.Builder()
+                .merchantId(wechatPayConfig.getMchId())
+                .privateKeyFromPath(wechatPayConfig.getPrivateKeyAbsolutePath())
+                .publicKeyFromPath(wechatPayConfig.getPublicKeyAbsolutePath())
+                .publicKeyId(wechatPayConfig.getPublicKeyId())
+                .merchantSerialNumber(wechatPayConfig.getCertSerialNo())
+                .apiV3Key(wechatPayConfig.getApiV3Key())
+                .build();
+
+        nativePayService = new NativePayService.Builder().config(config).build();
+        notificationParser = new NotificationParser(config);
+
+        log.info("WechatPayUtil 初始化完成，merchantId：{}", wechatPayConfig.getMchId());
+    }
+
+    /**
+     * Native支付下单，获取二维码URL
+     *
+     * @param outTradeNo  商户订单号
+     * @param amount      支付金额（单位：分）
+     * @param description 商品描述
+     * @return 二维码URL（code_url），失败返回null
+     */
+    public String createNativePayOrder(String outTradeNo, Long amount, String description) {
+        try {
+            PrepayRequest request = new PrepayRequest();
+            request.setAppid(wechatPayConfig.getAppId());
+            request.setMchid(wechatPayConfig.getMchId());
+            request.setDescription(description);
+            request.setNotifyUrl(wechatPayConfig.getNotifyUrl());
+            request.setOutTradeNo(outTradeNo);
+
+            Amount reqAmount = new Amount();
+            reqAmount.setTotal(amount.intValue());
+            request.setAmount(reqAmount);
+
+            PrepayResponse response = nativePayService.prepay(request);
+            String codeUrl = response.getCodeUrl();
+
+            log.info("Native支付下单成功，订单号：{}，codeUrl：{}", outTradeNo, codeUrl);
+            return codeUrl;
+
+        } catch (Exception e) {
+            log.error("Native支付下单失败，订单号：{}", outTradeNo, e);
+            return null;
+        }
+    }
+    /**
+     * 查询订单支付状态
+     *
+     * @param outTradeNo 商户订单号
+     * @return 微信支付交易对象，查询失败返回null
+     */
+    public Transaction queryOrderByOutTradeNo(String outTradeNo) {
+        try {
+            QueryOrderByOutTradeNoRequest request = new QueryOrderByOutTradeNoRequest();
+            request.setOutTradeNo(outTradeNo);
+            request.setMchid(wechatPayConfig.getMchId());
+
+            Transaction transaction = nativePayService.queryOrderByOutTradeNo(request);
+            log.info("查询微信支付订单成功，订单号：{}，状态：{}", outTradeNo, transaction.getTradeState());
+            return transaction;
+
+        } catch (Exception e) {
+            log.error("查询微信支付订单失败，订单号：{}", outTradeNo, e);
+            return null;
+        }
+    }
+
+
+
+    /**
+     * 关闭微信支付订单
+     *
+     * @param outTradeNo 商户订单号
+     * @return 关闭成功返回true，失败返回false
+     */
+    public boolean closeOrder(String outTradeNo) {
+        try {
+            CloseOrderRequest request = new CloseOrderRequest();
+            request.setMchid(wechatPayConfig.getMchId());
+            request.setOutTradeNo(outTradeNo);
+
+            nativePayService.closeOrder(request);
+            log.info("关闭微信支付订单成功，订单号：{}", outTradeNo);
+            return true;
+
+        } catch (Exception e) {
+            log.error("关闭微信支付订单失败，订单号：{}", outTradeNo, e);
+            return false;
+        }
+    }
+
 }
