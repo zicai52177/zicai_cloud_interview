@@ -108,4 +108,4 @@ wechat:
     #微信支付公钥ID
     public-key-id: PUB_KEY_ID_0117276847122026022500181903000200
     #回调地址
-    notify-url: http://ybcc9fab.natappfree.cc/api/v1/order/callback/wechat_pay
+    notify-url:  http://fe64d822.natappfree.cc/api/v1/order/callback/wechat_pay

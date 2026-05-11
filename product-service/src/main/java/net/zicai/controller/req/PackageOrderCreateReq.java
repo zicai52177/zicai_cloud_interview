@@ -12,15 +12,11 @@ import java.math.BigDecimal;
  * @description
  */
 @Data
-public class BenefitOrderCreateReq {
+public class PackageOrderCreateReq {
 
 
-    @NotNull(message = "benefitId不能为空")
-    private Long benefitId;
-
-    @NotNull(message = "porchaseCount不能为空")
-    @Min(value = 1, message = "porchaseCount不能小于1")
-    private Integer porchaseCount;
+    @NotNull(message = "packageId不能为空")
+    private Long PackageId;
 
     @NotNull(message = "payType不能为空")
     private String payType;
