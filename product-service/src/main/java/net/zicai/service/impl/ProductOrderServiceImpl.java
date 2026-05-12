@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wechat.pay.java.service.payments.model.Transaction;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.zicai.config.BenefitGrantMQConfig;
+import net.zicai.config.BenefitGrantMessage;
 import net.zicai.config.ProductOrderMQConfig;
 import net.zicai.controller.req.BenefitOrderCreateReq;
 import net.zicai.controller.req.PackageOrderCreateReq;
@@ -21,9 +23,11 @@ import net.zicai.enums.StatusEnum;
 import net.zicai.exception.BizException;
 import net.zicai.interceptor.AccountLoginInterceptor;
 import net.zicai.mapper.BenefitMapper;
+import net.zicai.mapper.PackageBenefitMapper;
 import net.zicai.mapper.ProductOrderMapper;
 import net.zicai.mapper.ProductPackageMapper;
 import net.zicai.model.BenefitDO;
+import net.zicai.model.PackageBenefitDO;
 import net.zicai.model.ProductOrderDO;
 import net.zicai.model.ProductPackageDO;
 import net.zicai.service.ProductOrderService;
@@ -65,6 +69,8 @@ public class ProductOrderServiceImpl implements ProductOrderService {
     private final ProductOrderMQConfig productOrderMQConfig;
 
     private final RabbitTemplate rabbitTemplate;
+
+    private final PackageBenefitMapper packageBenefitMapper;
 
     private static final String WECHAT_CALLBACK_SUCCESS = "{\"code\":\"SUCCESS\",\"message\":\"成功\"}";
 
@@ -110,6 +116,70 @@ public class ProductOrderServiceImpl implements ProductOrderService {
                 .codeUrl(codeUrl)
                 .build();
         return JsonData.buildSuccess(build);
+    }
+
+    @Override
+    public void handleTimeOutOrder(ProductOrderDTO productOrderDTO) {
+        String outTradeNo = productOrderDTO.getOutTradeNo();
+        log.info("处理订单超时：{}", outTradeNo);
+        try {
+            ProductOrderDO productOrderDO = productOrderMapper.selectById(productOrderDTO.getId());
+            if(productOrderDO == null){
+                log.error("订单不存在：{}", outTradeNo);
+                return;
+            }
+            //判断状态是否已经支付
+            if(OrderStateEnum.PAY.name().equals(productOrderDO.getOrderState())){
+                log.info("订单已支付：{}", outTradeNo);
+                return;
+            }
+            if (OrderStateEnum.CANCEL.name().equals(productOrderDO.getOrderState())){
+                log.info("订单已取消：{}", outTradeNo);
+                return;
+            }
+            //查询订单状态
+            if(PaymentEnum.WECHAT_PAY.name().equals(productOrderDO.getPayType())){
+                //调用微信支付的方法解决问题
+                handleWechatTimeOutOrder(productOrderDO);
+            }
+
+        }catch (Exception e){
+            log.error("处理订单超时异常：{}", outTradeNo, e);
+        }
+
+
+    }
+
+    private void handleWechatTimeOutOrder(ProductOrderDO productOrderDO) {
+
+        Transaction transaction = wechatPayUtil.queryOrderByOutTradeNo(productOrderDO.getOutTradeNo());
+
+        if(transaction == null){
+            log.error("订单不存在：{}", productOrderDO.getOutTradeNo());
+            return;
+        }
+        if(transaction.getTradeState().equals(Transaction.TradeStateEnum.SUCCESS)){
+            log.warn("回调异常补偿机制，订单已支付，但是数据库未更新，订单号：{}", productOrderDO.getOutTradeNo());
+            int updated = updateOrderState(productOrderDO.getOutTradeNo(), transaction.getTransactionId(), OrderStateEnum.PAY.name());
+            if(updated > 0){
+                log.info("订单已支付，更新数据库成功，订单号：{}", productOrderDO.getOutTradeNo());
+            }else {
+                log.error("订单已支付，更新数据库失败，订单号：{}", productOrderDO.getOutTradeNo());
+            }
+        }else if(Transaction.TradeStateEnum.USERPAYING.equals(transaction.getTradeState())){
+            log.warn("回调异常补偿机制，订单正在支付，但是数据库未更新，订单号：{}", productOrderDO.getOutTradeNo());
+        }else {
+            log.warn("订单已关闭，更新订单状态为已取消，订单号：{},订单状态：{}", productOrderDO.getOutTradeNo(), transaction.getTradeState());
+            cancleOrder(productOrderDO);
+        }
+
+    }
+
+    private void cancleOrder(ProductOrderDO productOrderDO) {
+        wechatPayUtil.closeOrder(productOrderDO.getOutTradeNo());
+        productOrderDO.setOrderState(OrderStateEnum.CANCEL.name());
+        productOrderMapper.updateById(productOrderDO);
+        log.info("订单已取消，更新数据库成功，订单号：{}", productOrderDO.getOutTradeNo());
     }
 
     @Override
@@ -339,5 +409,126 @@ public class ProductOrderServiceImpl implements ProductOrderService {
      */
     private ProductOrderDTO convertToDTO(ProductOrderDO productOrderDO) {
         return SpringBeanUtil.copyProperties(productOrderDO, ProductOrderDTO.class);
+    }
+
+    /**
+     * 处理权益订单发放
+     * @param orderDO
+     */
+    private void processSingleBenefit(ProductOrderDO orderDO) {
+        // 1. 根据 benefitId 查询权益基础信息（validDays 等）
+        BenefitDO benefitDO = benefitMapper.selectById(orderDO.getBenefitId());
+        if (benefitDO == null) {
+            log.error("权益不存在，发放失败, benefitId:{}", orderDO.getBenefitId());
+            return;
+        }
+
+        // 2. 构建单条 BenefitItem
+        BenefitGrantMessage.BenefitItem item = BenefitGrantMessage.BenefitItem.builder()
+                .benefitId(benefitDO.getId())
+                .benefitCode(benefitDO.getBenefitCode())
+                .count(orderDO.getPurchaseCount())      // 购买数量
+                .validDays(benefitDO.getValidDays())    // 单次有效天数
+                .build();
+
+        // 3. 构建消息并发送
+        BenefitGrantMessage message = BenefitGrantMessage.builder()
+                .outTradeNo(orderDO.getOutTradeNo())
+                .accountId(orderDO.getAccountId())
+                .orderId(orderDO.getId())
+                .orderType(orderDO.getOrderType())
+                .benefitItems(List.of(item))
+                .build();
+
+        rabbitTemplate.convertAndSend(
+                BenefitGrantMQConfig.BENEFIT_GRANT_EXCHANGE,
+                BenefitGrantMQConfig.BENEFIT_GRANT_ROUTING_KEY,
+                message
+        );
+        log.info("单权益发放消息已发送, outTradeNo:{}, benefitId:{}", orderDO.getOutTradeNo(), benefitDO.getId());
+    }
+
+    /**
+     * 处理套餐订单发放
+     * @param orderDO
+     */
+    private void processPackageBenefits(ProductOrderDO orderDO) {
+        // 1. 查询套餐下的所有权益配置
+        List<PackageBenefitDO> packageBenefitList = packageBenefitMapper.selectList(
+                new LambdaQueryWrapper<PackageBenefitDO>()
+                        .eq(PackageBenefitDO::getProductPackageId, orderDO.getProductPackageId())
+        );
+
+        if (packageBenefitList == null || packageBenefitList.isEmpty()) {
+            log.error("套餐下无权益配置，发放失败, productPackageId:{}", orderDO.getProductPackageId());
+            return;
+        }
+
+        // 2. 批量查出所有权益的详细信息（validDays 等）
+        List<String> benefitCodes = packageBenefitList.stream()
+                .map(PackageBenefitDO::getBenefitCode)
+                .collect(Collectors.toList());
+        Map<String, BenefitDO> benefitMap = benefitMapper.selectList(
+                        new LambdaQueryWrapper<BenefitDO>().in(BenefitDO::getBenefitCode, benefitCodes))
+                .stream()
+                .collect(Collectors.toMap(BenefitDO::getBenefitCode, b -> b));
+
+        // 3. 构建 BenefitItem 列表（每个套餐权益对应一条）
+        List<BenefitGrantMessage.BenefitItem> benefitItems = packageBenefitList.stream()
+                .map(packageBenefit -> {
+                    BenefitDO benefitDO = benefitMap.get(packageBenefit.getBenefitCode());
+                    return BenefitGrantMessage.BenefitItem.builder()
+                            .benefitId(benefitDO != null ? benefitDO.getId() : null)
+                            .benefitCode(packageBenefit.getBenefitCode())
+                            .count(packageBenefit.getCount())
+                            .validDays(benefitDO != null ? benefitDO.getValidDays() : null)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        // 4. 只发一条消息（携带完整权益列表）
+        BenefitGrantMessage message = BenefitGrantMessage.builder()
+                .outTradeNo(orderDO.getOutTradeNo())
+                .accountId(orderDO.getAccountId())
+                .orderId(orderDO.getId())
+                .orderType(orderDO.getOrderType())
+                .benefitItems(benefitItems)
+                .build();
+
+        rabbitTemplate.convertAndSend(
+                BenefitGrantMQConfig.BENEFIT_GRANT_EXCHANGE,
+                BenefitGrantMQConfig.BENEFIT_GRANT_ROUTING_KEY,
+                message
+        );
+        log.info("套餐权益发放消息已发送, outTradeNo:{}, 权益数量:{}", orderDO.getOutTradeNo(), benefitItems.size());
+    }
+
+    /**
+     * 处理订单权益发放
+     * @param outTradeNo
+     */
+    private void processOrderBenefits(String outTradeNo) {
+        try {
+            // 1. 查询订单
+            ProductOrderDO productOrderDO = productOrderMapper.selectOne(
+                    new LambdaQueryWrapper<ProductOrderDO>()
+                            .eq(ProductOrderDO::getOutTradeNo, outTradeNo)
+            );
+
+            // 2. 订单校验：不存在或未支付则跳过
+            if (productOrderDO == null || !OrderStateEnum.PAY.name().equals(productOrderDO.getOrderState())) {
+                log.warn("权益发放跳过，订单不存在或未支付, outTradeNo:{}", outTradeNo);
+                return;
+            }
+
+            // 3. 按订单类型分发
+            if (OrderTypeEnum.PACKAGE_ORDER.name().equals(productOrderDO.getOrderType())) {
+                processPackageBenefits(productOrderDO);
+            } else if (OrderTypeEnum.BENEFIT_ORDER.name().equals(productOrderDO.getOrderType())) {
+                processSingleBenefit(productOrderDO);
+            }
+        } catch (Exception e) {
+            log.error("权益发放消息发送失败, outTradeNo:{}", outTradeNo, e);
+        }
     }
 }

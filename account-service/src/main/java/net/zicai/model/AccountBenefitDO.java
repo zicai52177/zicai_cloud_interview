@@ -7,8 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.util.Date;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * <p>
@@ -22,6 +21,9 @@ import lombok.Setter;
 @Setter
 @TableName("account_benefit")
 @Schema(name = "AccountBenefitDO", description = "用户权益表")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class AccountBenefitDO implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -34,6 +36,10 @@ public class AccountBenefitDO implements Serializable {
     @TableField("account_id")
     private Long accountId;
 
+    @Schema(description = "权益ID")
+    @TableField("benefit_id")
+    private Long benefitId;
+
     @Schema(description = "权益编码")
     @TableField("benefit_code")
     private String benefitCode;
@@ -41,6 +47,10 @@ public class AccountBenefitDO implements Serializable {
     @Schema(description = "来源订单ID")
     @TableField("product_order_id")
     private Long productOrderId;
+
+    @Schema(description = "来源类型(package_order:套餐订单,benefit_order:权益订单)")
+    @TableField("order_type")
+    private String orderType;
 
     @Schema(description = "剩余次数")
     @TableField("remaining_count")

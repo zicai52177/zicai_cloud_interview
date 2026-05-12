@@ -43,27 +43,6 @@ public class ProductOrderMQConfig {
 
     // 过期时间：1分钟
     private Integer ttl = 1000 * 60 ;
-
-    /**
-     * 配置 JSON 消息转换器，替代默认的 Java 原生序列化
-     * SpringAMQP3.x默认使用 Java 原生序列化时，会校验反序列化白名单，ProductOrderDTO 不在白名单中导致反序列化失败。
-     * 最佳解决方案是配置 Jackson2JsonMessageConverter，改用 JSON 序列化替代 Java 原生序列化。
-     */
-    @Bean
-    public MessageConverter messageConverter() {
-        return new Jackson2JsonMessageConverter();
-    }
-
-    /**
-     * 配置 RabbitTemplate，使用 JSON 消息转换器
-     */
-    @Bean
-    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
-        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        rabbitTemplate.setMessageConverter(messageConverter());
-        return rabbitTemplate;
-    }
-
     /**
      * 创建交换机
      */

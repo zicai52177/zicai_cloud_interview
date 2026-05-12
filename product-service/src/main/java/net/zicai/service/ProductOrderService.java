@@ -16,6 +16,9 @@ import java.util.Map;
  * @description
  */
 public interface ProductOrderService {
+    void handleTimeOutOrder(ProductOrderDTO productOrderDTO);
+
+
     JsonData createBenefitOrder(@Valid BenefitOrderCreateReq req);
 
     JsonData createPackageOrder(@Valid PackageOrderCreateReq req);

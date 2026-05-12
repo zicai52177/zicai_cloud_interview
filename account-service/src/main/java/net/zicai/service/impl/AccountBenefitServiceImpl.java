@@ -3,6 +3,7 @@ package net.zicai.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import net.zicai.config.BenefitDelayCheckMQConfig;
+import net.zicai.config.BenefitGrantMessage;
 import net.zicai.dto.BenefitCheckResultDTO;
 import net.zicai.dto.BenefitDelayCheckMessageDTO;
 import net.zicai.enums.BizCodeEnum;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -91,6 +93,74 @@ public class AccountBenefitServiceImpl implements AccountBenefitService {
                 .remainingCount(accountBenefitDO.getRemainingCount())
                 .deductedCount(count    ).build();
         return JsonData.buildSuccess(benefitCheckResultDTO);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void grantBenefit(BenefitGrantMessage message) {
+        List<BenefitGrantMessage.BenefitItem> benefitItems = message.getBenefitItems();
+        if (benefitItems == null || benefitItems.isEmpty()) {
+            log.warn("权益列表为空，跳过发放, outTradeNo:{}", message.getOutTradeNo());
+            return;
+        }
+        // 遍历所有权益 item，逐条发放
+        for (BenefitGrantMessage.BenefitItem item : benefitItems) {
+            grantSingleItem(message, item);
+        }
+    }
+
+    /**
+     * 发放单条权益：每次购买均插入新记录，保持独立有效期
+     */
+    private void grantSingleItem(BenefitGrantMessage message, BenefitGrantMessage.BenefitItem item) {
+        String benefitCode = item.getBenefitCode();
+        int count = item.getCount();
+
+        // 幂等检查：同一订单同一权益ID只发放一次（防止 MQ 重复消费）
+        Long existByOrder = accountBenefitMapper.selectCount(
+                new LambdaQueryWrapper<AccountBenefitDO>()
+                        .eq(AccountBenefitDO::getProductOrderId, message.getOrderId())
+                        .eq(AccountBenefitDO::getBenefitId, item.getBenefitId())
+        );
+        if (existByOrder > 0) {
+            log.warn("权益已发放，跳过（幂等），orderId:{}, benefitId:{}", message.getOrderId(), item.getBenefitId());
+            return;
+        }
+
+        // 每次购买插入新记录，保持独立有效期
+        Date startTime = new Date();
+        Date endTime = calcEndTime(startTime, item.getValidDays(), count);
+
+        AccountBenefitDO accountBenefitDO = AccountBenefitDO.builder()
+                .accountId(message.getAccountId())
+                .benefitId(item.getBenefitId())
+                .benefitCode(benefitCode)
+                .productOrderId(message.getOrderId())
+                .orderType(message.getOrderType())
+                .remainingCount(count)
+                .totalCount(count)
+                .startTime(startTime)
+                .endTime(endTime)
+                .build();
+
+        accountBenefitMapper.insert(accountBenefitDO);
+        log.info("权益发放成功, accountId:{}, benefitId:{}, benefitCode:{}, orderType:{}, count:{}, startTime:{}, endTime:{}",
+                message.getAccountId(), item.getBenefitId(), benefitCode, message.getOrderType(), count, startTime, endTime);
+    }
+
+    /**
+     * 计算权益到期时间
+     *
+     * @param baseTime  计算起点
+     * @param validDays 单次有效天数（null 时默认 365 天）
+     * @param count     本次发放次数
+     */
+    private Date calcEndTime(Date baseTime, Integer validDays, int count) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(baseTime);
+        int days = (validDays != null && validDays > 0) ? validDays * count : 365 * count;
+        calendar.add(Calendar.DAY_OF_YEAR, days);
+        return calendar.getTime();
     }
 
     private void sendDelayCheckMqMsg(String messageId, String businessId) {

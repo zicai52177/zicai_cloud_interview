@@ -1,5 +1,6 @@
 package net.zicai.service;
 
+import net.zicai.config.BenefitGrantMessage;
 import net.zicai.req.BenefitCheckReq;
 import net.zicai.util.JsonData;
 
@@ -10,4 +11,6 @@ import net.zicai.util.JsonData;
  */
 public interface AccountBenefitService {
     JsonData checkAndDeductBenefit(BenefitCheckReq benefitCheckReq);
+
+    void grantBenefit(BenefitGrantMessage message);
 }
