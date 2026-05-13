@@ -67,14 +67,16 @@ const router = createRouter({
 
 // 路由守卫
 router.beforeEach((to, _from, next) => {
-  const userStore = useUserStore()
-
   if (to.meta.requiresAuth === false) {
     next()
     return
   }
 
-  if (!userStore.isLoggedIn()) {
+  // 同时检查 Pinia store 和 localStorage，避免响应式时序问题
+  const userStore = useUserStore()
+  const hasToken = userStore.isLoggedIn() || !!localStorage.getItem('token')
+
+  if (!hasToken) {
     next({ path: '/login', query: { redirect: to.fullPath } })
     return
   }

@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import net.zicai.dto.BenefitDTO;
-import net.zicai.enums.BenefitEnum;
+import net.zicai.dto.ProductPackageDTO;
 import net.zicai.enums.StatusEnum;
 import net.zicai.service.BenefitService;
 import net.zicai.service.ProductPackageService;
@@ -32,9 +32,21 @@ public class ProductController {
     private ProductPackageService productPackageService;
 
     /**
+     * 查询套餐列表
+     *
+     * @return 套餐列表（含权益信息）
+     */
+    @Operation(summary = "查询套餐列表", description = "查询所有上线状态的套餐，包含套餐内权益信息")
+    @GetMapping("/packages")
+    public JsonData listPackages() {
+        log.info("查询套餐列表请求");
+        List<ProductPackageDTO> packageList = productPackageService.listPackages(StatusEnum.ON.name());
+        return JsonData.buildSuccess(packageList);
+    }
+
+    /**
      * 查询权益列表
      *
-     * @param status 状态（可选，ON上线/OFF下线，默认查询ON）
      * @return 权益列表
      */
     @Operation(summary = "查询权益列表", description = "查询所有可用的权益列表，默认返回上线状态的权益")

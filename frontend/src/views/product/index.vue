@@ -8,14 +8,14 @@
         class="package-card"
         shadow="hover"
       >
-        <div class="package-name">{{ pkg.title }}</div>
+        <div class="package-name">{{ pkg.name }}</div>
         <div class="package-price">
-          <span class="price">¥{{ pkg.amount }}</span>
+          <span class="price">¥{{ pkg.price }}</span>
         </div>
-        <div class="package-desc">{{ pkg.detail }}</div>
+        <div class="package-desc">{{ pkg.description }}</div>
         <ul class="benefit-list">
-          <li v-for="(benefit, idx) in pkg.benefitList" :key="idx">
-            {{ benefit.benefitName }} x{{ benefit.num }}
+          <li v-for="(benefit, idx) in pkg.benefits" :key="idx">
+            {{ benefit.name }}
           </li>
         </ul>
         <el-button type="primary" class="buy-btn" @click="handleBuy(pkg)">
@@ -29,7 +29,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getPackagesApi, createOrderApi } from '@/api/product'
+import { getPackagesApi, createPackageOrderApi } from '@/api/product'
 
 const packageList = ref<any[]>([])
 const loading = ref(false)
@@ -48,8 +48,8 @@ onMounted(async () => {
 
 async function handleBuy(pkg: any) {
   try {
-    await ElMessageBox.confirm(`确认购买「${pkg.title}」，金额 ¥${pkg.amount}？`, '确认购买')
-    const res = await createOrderApi({ productId: pkg.id, payType: 'WECHAT_PAY' })
+    await ElMessageBox.confirm(`确认购买「${pkg.name}」，金额 ¥${pkg.price}？`, '确认购买')
+    const res = await createPackageOrderApi({ PackageId: pkg.id, payType: 'WECHAT_PAY' })
     if (res.data?.codeUrl) {
       ElMessage.success('订单创建成功，请扫码支付')
       // TODO: 展示支付二维码

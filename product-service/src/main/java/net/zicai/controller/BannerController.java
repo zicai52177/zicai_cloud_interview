@@ -13,7 +13,7 @@ import java.util.List;
  * Banner控制器
  */
 @RestController
-@RequestMapping("/api/banner/v1")
+@RequestMapping("/api/v1/banner")
 @Slf4j
 public class BannerController {
 

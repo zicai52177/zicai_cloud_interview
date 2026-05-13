@@ -154,16 +154,25 @@ async function handleLogin() {
 
   loading.value = true
   try {
-    const res = await loginApi({ phone: form.phone, code: form.code })
-    userStore.setToken(res.data.token)
-    if (res.data.userInfo) {
-      userStore.setUserInfo(res.data.userInfo)
+    const res = await loginApi({ identifier: form.phone, checkCode: form.code, type: 'LOGIN' })
+    const token = res.data?.token
+    if (!token) {
+      ElMessage.error('登录异常：未获取到token')
+      return
+    }
+    userStore.setToken(token)
+    if (res.data.accountDTO) {
+      userStore.setUserInfo(res.data.accountDTO)
     }
     ElMessage.success('登录成功')
     const redirect = (route.query.redirect as string) || '/home'
-    router.push(redirect)
-  } catch (e) {
-    // error handled by interceptor
+    const failure = await router.push(redirect)
+    if (failure) {
+      console.error('路由跳转失败:', failure)
+      window.location.href = redirect
+    }
+  } catch (e: any) {
+    console.error('登录流程异常:', e)
   } finally {
     loading.value = false
   }

@@ -20,7 +20,12 @@ export function getInterviewListApi(data: { page: number; size: number }) {
   return request({ url: '/v1/interview/page', method: 'post', data })
 }
 
-// 获取面试详情
-export function getInterviewDetailApi(id: number) {
-  return request({ url: '/v1/interview/detail', method: 'get', params: { id } })
+// 获取简历详情
+export function getResumeDetailApi(id: number) {
+  return request({ url: '/v1/resume/detail', method: 'get', params: { id } })
+}
+
+// 分析简历
+export function analyseResumeApi(id: number) {
+  return request({ url: '/v1/resume/analyse', method: 'get', params: { id } })
 }

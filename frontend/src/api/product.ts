@@ -15,17 +15,22 @@ export function getBannerListApi() {
   return request({ url: '/v1/banner/list', method: 'get' })
 }
 
-// 创建订单
-export function createOrderApi(data: { productId: number; payType: string }) {
-  return request({ url: '/v1/order/add', method: 'post', data })
+// 创建套餐订单
+export function createPackageOrderApi(data: { PackageId: number; payType: string; discount?: number }) {
+  return request({ url: '/v1/order/package/create', method: 'post', data })
 }
 
-// 查询订单状态
-export function getOrderStatusApi(orderNo: string) {
-  return request({ url: '/v1/order/detail', method: 'get', params: { orderNo } })
+// 创建权益订单
+export function createBenefitOrderApi(data: { benefitId: number; porchaseCount: number; payType: string; discount?: number }) {
+  return request({ url: '/v1/order/benefit/create', method: 'post', data })
 }
 
-// 查询订单列表
-export function getOrderListApi(data: { page: number; size: number }) {
+// 查询订单支付状态
+export function getOrderStatusApi(outTradeNo: string) {
+  return request({ url: '/v1/order/status', method: 'get', params: { outTradeNo } })
+}
+
+// 查询订单列表（分页）
+export function getOrderListApi(data: { page: number; size: number; orderState?: string; orderType?: string }) {
   return request({ url: '/v1/order/page', method: 'post', data })
 }

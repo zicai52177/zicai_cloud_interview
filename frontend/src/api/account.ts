@@ -1,7 +1,7 @@
 import { request } from './request'
 
 // 登录
-export function loginApi(data: { phone: string; code: string }) {
+export function loginApi(data: { identifier: string; checkCode: string; type: string }) {
   return request({ url: '/v1/account/login', method: 'post', data })
 }
 
@@ -22,5 +22,5 @@ export function getUserInfoApi() {
 
 // 上传头像
 export function uploadAvatarApi(file: FormData) {
-  return request({ url: '/v1/account/upload_avatar', method: 'post', data: file })
+  return request({ url: '/v1/account/avatar', method: 'post', data: file })
 }

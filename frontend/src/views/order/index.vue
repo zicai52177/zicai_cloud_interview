@@ -5,14 +5,14 @@
         <span>我的订单</span>
       </template>
       <el-table :data="orderList" v-loading="loading" empty-text="暂无订单">
-        <el-table-column prop="orderNo" label="订单号" width="200" />
-        <el-table-column prop="productTitle" label="商品" />
-        <el-table-column prop="amount" label="金额" width="100">
-          <template #default="{ row }">¥{{ row.amount }}</template>
+        <el-table-column prop="outTradeNo" label="订单号" width="200" />
+        <el-table-column prop="title" label="商品" />
+        <el-table-column prop="payAmount" label="金额" width="100">
+          <template #default="{ row }">¥{{ row.payAmount }}</template>
         </el-table-column>
-        <el-table-column prop="state" label="状态" width="120">
+        <el-table-column prop="orderState" label="状态" width="120">
           <template #default="{ row }">
-            <el-tag :type="getStatusType(row.state)">{{ getStatusText(row.state) }}</el-tag>
+            <el-tag :type="getStatusType(row.orderState)">{{ getStatusText(row.orderState) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="gmtCreate" label="下单时间" width="180" />
@@ -60,8 +60,8 @@ function handlePageChange(val: number) {
   fetchOrders()
 }
 
-function getStatusType(state: string) {
-  const map: Record<string, string> = {
+function getStatusType(state: string): 'primary' | 'success' | 'warning' | 'info' | 'danger' {
+  const map: Record<string, 'primary' | 'success' | 'warning' | 'info' | 'danger'> = {
     NEW: 'warning', PAY: 'success', CANCEL: 'info', REFUND: 'danger',
   }
   return map[state] || 'info'

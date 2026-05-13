@@ -4,7 +4,7 @@
     <el-carousel :interval="5000" height="300px" class="banner">
       <el-carousel-item v-for="item in bannerList" :key="item.id">
         <div class="banner-item" :style="{ backgroundImage: `url(${item.imgUrl})` }">
-          <h2>{{ item.title }}</h2>
+          <h2>{{ item.name }}</h2>
         </div>
       </el-carousel-item>
       <el-carousel-item v-if="bannerList.length === 0">
@@ -48,8 +48,9 @@ import { getBannerListApi } from '@/api/product'
 
 interface Banner {
   id: number
-  title: string
+  name: string
   imgUrl: string
+  text: string
 }
 
 const bannerList = ref<Banner[]>([])
