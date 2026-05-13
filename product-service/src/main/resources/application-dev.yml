@@ -45,6 +45,13 @@ spring:
 lock:
   prefix-key: dev
 
+# Flyway
+spring.flyway:
+  enabled: true
+  baseline-on-migrate: true
+  baseline-version: 0
+  locations: classpath:db/migration
+
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: net.zicai.model
@@ -84,28 +91,27 @@ aliyun:
     public-bucket-name: zccloud-interview-pub         # 公开访问的存储桶（头像/题图）
     public-domain: https://zccloud-interview-pub.oss-cn-beijing.aliyuncs.com/  # 公开访问域名
 
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+
+feign:
+  internal:
+    secret: ${FEIGN_INTERNAL_SECRET:}
+
 wechat:
   login:
-    app-id: wx8607439bff426835
-    app-secret: babae6d002449f1fae482cc0088e3bce
+    app-id: ${WECHAT_APP_ID}
+    app-secret: ${WECHAT_APP_SECRET}
     qr-code-expire-time: 120
     login-state-expire-time: 300
-    token: zccloud_interview_test_2026
+    token: ${WECHAT_TOKEN}
 
   pay:
-    #商户号
-    mch-id: 1727684712
-    #公众号APPID
-    app-id: wx731dc40c4097e341
-    #商户API证书序列号
-    cert-serial-no: 19EC4EA464F61B6C757882327E6F805FB700FEA9
-    #APIv3密钥
-    api-v3-key: Xdclass168Xdclass168Xdclass16888
-    #商户API证书私钥的存放路径
-    private-key-path: classpath:/cert/apiclient_key.pem
-    #微信支付公钥的存放路径
-    public-key-path: classpath:/cert/pub_key.pem
-    #微信支付公钥ID
-    public-key-id: PUB_KEY_ID_0117276847122026022500181903000200
-    #回调地址
-    notify-url:  http://fe64d822.natappfree.cc/api/v1/order/callback/wechat_pay
+    mch-id: ${WECHAT_PAY_MCH_ID}
+    app-id: ${WECHAT_PAY_APP_ID:wx731dc40c4097e341}
+    cert-serial-no: ${WECHAT_PAY_CERT_SERIAL_NO}
+    api-v3-key: ${WECHAT_PAY_API_V3_KEY}
+    private-key-path: ${WECHAT_PAY_PRIVATE_KEY_PATH:classpath:/cert/apiclient_key.pem}
+    public-key-path: ${WECHAT_PAY_PUBLIC_KEY_PATH:classpath:/cert/pub_key.pem}
+    public-key-id: ${WECHAT_PAY_PUBLIC_KEY_ID}
+    notify-url: ${WECHAT_PAY_NOTIFY_URL:http://localhost:9003/api/v1/order/callback/wechat_pay}

@@ -2,6 +2,7 @@ package net.zicai.litsener;
 
 import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;
+import net.zicai.config.BenefitGrantMQConfig;
 import net.zicai.config.BenefitGrantMessage;
 import net.zicai.service.AccountBenefitService;
 import org.springframework.amqp.core.Message;
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j
-@RabbitListener(queues = "benefit_grant_queue")
+@RabbitListener(queues = BenefitGrantMQConfig.BENEFIT_GRANT_QUEUE)
 public class BenefitGrantMQListener {
     @Autowired
     private AccountBenefitService accountBenefitService;

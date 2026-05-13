@@ -11,29 +11,35 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 
 /**
- * 小滴课堂,愿景：让技术不再难学
- *
- * @Description
- * @Author 紫菜
- * @Remark 有问题直接联系我，源码-笔记-技术交流群,官网 https://xdclass.net
- * @Version 1.0
- **/
+ * JWT工具类
+ * 密钥通过 JwtConfig 从配置文件注入，禁止硬编码
+ */
 @Slf4j
 public class JwtUtil {
 
-
     private static final String LOGIN_SUBJECT = "ai";
 
-    // 租户相关，注意这个密钥长度需要足够长, 推荐：JWT的密钥，从环境变量中获取
-    private final static String TENANT_ACCOUNT_SECRET_KEY = "xdclass.net168xdclass.net168xdclass.net168xdclass.net168xdclass.net168";
-    // 租户相关 使用密钥
-    private final static SecretKey TENANT_ACCOUNT_KEY = Keys.hmacShaKeyFor(TENANT_ACCOUNT_SECRET_KEY.getBytes());
-
+    /**
+     * JWT密钥，由 JwtConfig 在应用启动时通过 initSecretKey() 注入
+     * 配置项: jwt.secret-key (来自环境变量 JWT_SECRET_KEY)
+     */
+    private static volatile SecretKey TENANT_ACCOUNT_KEY;
 
     // 签名算法
     private final static SecureDigestAlgorithm<SecretKey, SecretKey> ALGORITHM = Jwts.SIG.HS256;
     // token过期时间，30天
     private static final long EXPIRED = 1000L * 60 * 60 * 24 * 30;
+
+    /**
+     * 初始化密钥（由 JwtConfig 调用）
+     */
+    public static void initSecretKey(String secretKey) {
+        if (secretKey == null || secretKey.length() < 32) {
+            throw new IllegalArgumentException("JWT密钥长度不能少于32个字符，请检查配置项 jwt.secret-key");
+        }
+        TENANT_ACCOUNT_KEY = Keys.hmacShaKeyFor(secretKey.getBytes());
+        log.info("JWT密钥初始化完成");
+    }
 
     /**
      * 生成JWT
@@ -42,6 +48,9 @@ public class JwtUtil {
      * @throws NullPointerException 如果传入的accountDTO为空
      */
     public static String geneTenantAccountLoginJWT(AccountDTO accountDTO) {
+        if (TENANT_ACCOUNT_KEY == null) {
+            throw new IllegalStateException("JWT密钥未初始化，请检查 JwtConfig 配置");
+        }
         if (accountDTO == null) {
             throw new NullPointerException("对象为空");
         }
@@ -72,6 +81,9 @@ public class JwtUtil {
      */
     public static Claims checkTenantAccountLoginJWT(String token) {
         try {
+            if (TENANT_ACCOUNT_KEY == null) {
+                throw new IllegalStateException("JWT密钥未初始化，请检查 JwtConfig 配置");
+            }
             log.debug("开始校验 JWT: {}", token);
             // 校验 Token 是否为空
             if (token == null || token.trim().isEmpty()) {

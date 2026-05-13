@@ -60,4 +60,21 @@ public class BenefitDelayCheckMQListener {
             }
         }
     }
+
+    /**
+     * 兜底处理：丢弃无法被Jackson反序列化的旧消息（Java原生序列化格式）
+     * 当队列中残留application/x-java-serialized-object格式的消息时，
+     * converter无法将其转为DTO，会降级为byte[]传入此方法
+     */
+    @RabbitHandler(isDefault = true)
+    public void handleUnknownMessage(byte[] body, Message amqpMessage, Channel channel) {
+        log.warn("收到无法解析的消息，丢弃处理, contentType={}, deliveryTag={}",
+                amqpMessage.getMessageProperties().getContentType(),
+                amqpMessage.getMessageProperties().getDeliveryTag());
+        try {
+            channel.basicAck(amqpMessage.getMessageProperties().getDeliveryTag(), false);
+        } catch (Exception e) {
+            log.error("丢弃消息ACK失败", e);
+        }
+    }
 }

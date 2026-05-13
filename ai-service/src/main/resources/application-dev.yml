@@ -64,6 +64,13 @@ spring:
 lock:
   prefix-key: dev
 
+# Flyway
+spring.flyway:
+  enabled: true
+  baseline-on-migrate: true
+  baseline-version: 0
+  locations: classpath:db/migration
+
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: net.zicai.model
@@ -103,3 +110,10 @@ searxng:
   format: json                          # 返回格式，必须为 json
   language: zh                          # 搜索语言
   engines: bing,baidu                        # 搜索引擎（多个用逗号分隔，如：bing,google）
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+
+feign:
+  internal:
+    secret: ${FEIGN_INTERNAL_SECRET:}

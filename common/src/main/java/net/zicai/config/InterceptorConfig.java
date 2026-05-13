@@ -2,6 +2,7 @@ package net.zicai.config;
 
 import lombok.extern.slf4j.Slf4j;
 import net.zicai.interceptor.AccountLoginInterceptor;
+import net.zicai.interceptor.InternalApiInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -15,8 +16,23 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class InterceptorConfig implements WebMvcConfigurer {
 
+    private final InternalApiInterceptor internalApiInterceptor;
+
+    public InterceptorConfig(InternalApiInterceptor internalApiInterceptor) {
+        this.internalApiInterceptor = internalApiInterceptor;
+    }
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        // 内部API拦截器（优先级最高）：验证内部服务调用密钥
+        registry.addInterceptor(internalApiInterceptor)
+                .addPathPatterns(
+                        "/api/v1/account/benefit/checkAndDeduct",
+                        "/api/v1/account/benefit/task/updateStatus"
+                )
+                .order(0);
+
+        // 登录拦截器
         registry.addInterceptor(new AccountLoginInterceptor())
                 .addPathPatterns("/**")
                 //不拦截的路径
@@ -39,7 +55,7 @@ public class InterceptorConfig implements WebMvcConfigurer {
                         "/api/v1/product/benefits",
                         "/api/v1/product/package/detail",
                         "/api/v1/product/benefit/detail",
-                        //内部请求，不需要拦截（可以由网关配置禁止外部调用）
+                        // 内部请求（由 InternalApiInterceptor 保护，不需要登录拦截）
                         "/api/v1/account/benefit/checkAndDeduct",
                         "/api/v1/account/benefit/task/updateStatus",
                         // 支付回调接口（不需要登录）
@@ -49,8 +65,6 @@ public class InterceptorConfig implements WebMvcConfigurer {
                         "/favicon.ico",
                         "/api/v1/pay/test/native",
                         "/error")
-                        .order(1);
-                        // 优先级
-
+                .order(1);
     }
 }
