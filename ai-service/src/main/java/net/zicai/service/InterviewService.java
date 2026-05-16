@@ -1,11 +1,11 @@
-package net.xdclass.service;
+package net.zicai.service;
 
-import net.xdclass.controller.req.AnswerReq;
-import net.xdclass.controller.req.InterviewCreateReq;
-import net.xdclass.controller.req.InterviewFinishReq;
-import net.xdclass.controller.req.InterviewPageReq;
-import net.xdclass.dto.InterviewCreateMessageDTO;
-import net.xdclass.util.JsonData;
+import net.zicai.controller.req.AnswerReq;
+import net.zicai.controller.req.InterviewCreateReq;
+import net.zicai.controller.req.InterviewFinishReq;
+import net.zicai.controller.req.InterviewPageReq;
+import net.zicai.dto.InterviewCreateMessageDTO;
+import net.zicai.util.JsonData;
 
 /**
  * AI面试服务接口

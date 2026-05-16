@@ -1,4 +1,4 @@
-package net.xdclass.dto;
+package net.zicai.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

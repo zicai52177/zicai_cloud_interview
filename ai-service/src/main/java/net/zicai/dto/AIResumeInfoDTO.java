@@ -1,4 +1,4 @@
-package net.xdclass.dto;
+package net.zicai.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

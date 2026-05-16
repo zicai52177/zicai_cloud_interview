@@ -1,4 +1,4 @@
-package net.xdclass.controller.req;
+package net.zicai.controller.req;
 
 import lombok.Data;
 

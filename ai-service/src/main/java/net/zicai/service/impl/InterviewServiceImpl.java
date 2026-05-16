@@ -1,27 +1,35 @@
-package net.xdclass.service.impl;
+package net.zicai.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.xdclass.controller.req.AnswerReq;
-import net.xdclass.controller.req.InterviewCreateReq;
-import net.xdclass.controller.req.InterviewFinishReq;
-import net.xdclass.controller.req.InterviewPageReq;
-import net.xdclass.dto.AccountDTO;
-import net.xdclass.dto.InterviewCreateMessageDTO;
-import net.xdclass.dto.InterviewDTO;
-import net.xdclass.enums.InterviewStatusEnum;
-import net.xdclass.interceptor.AccountLoginInterceptor;
-import net.xdclass.mapper.InterviewMapper;
-import net.xdclass.mapper.InterviewRoundMapper;
-import net.xdclass.mapper.QuestionMapper;
-import net.xdclass.model.InterviewDO;
-import net.xdclass.model.InterviewRoundDO;
-import net.xdclass.model.QuestionDO;
-import net.xdclass.service.InterviewService;
-import net.xdclass.util.CommonUtil;
-import net.xdclass.util.JsonData;
+import net.zicai.controller.req.AnswerReq;
+import net.zicai.controller.req.InterviewCreateReq;
+import net.zicai.controller.req.InterviewFinishReq;
+import net.zicai.controller.req.InterviewPageReq;
+import net.zicai.dto.*;
+import net.zicai.enums.BenefitEnum;
+import net.zicai.enums.BizCodeEnum;
+import net.zicai.enums.InterviewStatusEnum;
+import net.zicai.feign.AccountBenefitFeign;
+import net.zicai.interceptor.AccountLoginInterceptor;
+import net.zicai.mapper.InterviewMapper;
+import net.zicai.mapper.InterviewRoundMapper;
+import net.zicai.mapper.QuestionMapper;
+import net.zicai.mapper.ResumeMapper;
+import net.zicai.model.InterviewDO;
+import net.zicai.model.InterviewRoundDO;
+import net.zicai.model.QuestionDO;
+import net.zicai.model.ResumeDO;
+import net.zicai.req.BenefitCheckReq;
+import net.zicai.service.InterviewService;
+import net.zicai.strategy.BenefitMessageStrategy;
+import net.zicai.strategy.BenefitMessageStrategyFactory;
+import net.zicai.util.CommonUtil;
+import net.zicai.util.JsonData;
+import net.zicai.util.JsonUtil;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -47,10 +55,78 @@ public class InterviewServiceImpl implements InterviewService {
     private final InterviewMapper interviewMapper;
     private final InterviewRoundMapper interviewRoundMapper;
     private final QuestionMapper questionMapper;
+    private final ResumeMapper resumeMapper;
+    private final ResumeDTO resumeDTO;
+    private final AccountBenefitFeign benefitService;
+    private final BenefitMessageStrategyFactory strategyFactory;
 
     @Override
     public JsonData create(InterviewCreateReq req) {
-        return null;
+
+        //获取用户信息
+        AccountDTO accountDTO = AccountLoginInterceptor.threadLocal.get();
+        if (accountDTO == null) {
+            return JsonData.buildError("用户不存在");
+        }
+        ResumeDO resumeDO = resumeMapper.selectById(accountDTO.getId());
+        if (resumeDO == null){
+            return JsonData.buildError("请先上传简历");
+        }
+        //构建面试DO
+        String interviewTitle = resumeDTO.getFilename() + "_" +
+                String.format("岗位:%s-%s-期望薪资:%s",
+                        req.getTargetPosition(),
+                        BenefitEnum.valueOf(req.getInterviewType()).getTitle(),
+                        req.getExpectedSalary());
+        String description = String.format("⾯试轮次：%s ;当前 %s 经验⾯试；期望薪资:%s; 期望⼯作城市:%s;",
+                req.getInterviewType(), req.getWorkYears(), req.getExpectedSalary(), req.getTargetCity());
+        String profileJson = JsonUtil.obj2Json(req);
+        InterviewDO interviewDO = InterviewDO.builder()
+                .resumeId(req.getResumeId())
+                .title(interviewTitle)
+                .description(description)
+                .type(req.getInterviewType())
+                .status(InterviewStatusEnum.GENERATING.getCode())
+                .accountId(accountDTO.getId())
+                .extendContent(req.getSpecialContent())
+                .profile(profileJson)
+                .build();
+        interviewMapper.insert(interviewDO);
+        Long interviewId = interviewDO.getId();
+        String businessId = interviewId.toString();
+        log.info("创建⾯试记录成功, ⾯试ID={}, ⽤户ID={}", interviewId, accountDTO.getId());
+        //扣减权益，如果扣减失败就删除掉面试订单
+        BenefitCheckReq benefitCheckReq = new BenefitCheckReq(
+                req.getInterviewType(), accountDTO.getId(), businessId, 1);
+        JsonData jsonData = benefitService.checkAndDeductBenefit(benefitCheckReq);
+        if (jsonData.getCode()!=0) {
+            log.warn("权益扣减失败，⽤户：{}，权益编码：{}，错误：{}",
+                    accountDTO.getId(), req.getInterviewType(), jsonData.getMsg());
+            interviewMapper.deleteById(interviewId);
+            return JsonData.buildResult(BizCodeEnum.BENEFIT_NOT_ENOUGH);
+        }
+        log.info("权益扣减成功, ⽤户ID={}", accountDTO.getId());
+        // 4. 解析扣减结果
+        BenefitCheckResultDTO deductResult = jsonData.getData(BenefitCheckResultDTO.class);
+        log.info("权益扣减成功，messageId={}，开始发送业务MQ消息", deductResult.getMessageId());
+        //发送MQ消息
+        try {
+            BenefitMessageStrategy strategy = strategyFactory.getStrategy(benefitCheckReq.getBenefitCode());
+            strategy.sendBusinessMessage(
+                    deductResult.getMessageId(),
+                    deductResult.getBusinessId(),
+                    benefitCheckReq.getAccountId()
+            );
+            log.info("业务MQ消息发送成功，messageId={}", deductResult.getMessageId());
+        } catch (Exception e) {
+            log.error("业务MQ消息发送失败，messageId={}，等待延迟检查补偿", deductResult.getMessageId(), e);
+        }
+        //返回结果
+        Map<String, Object> result = new HashMap<>();
+        result.put("interviewId", interviewId);
+        result.put("status", "generating");
+        result.put("message", "⾯试正在⽣成中，请稍候...");
+        return JsonData.buildSuccess(result);
     }
 
     @Override

@@ -24,3 +24,15 @@ export function getUserInfoApi() {
 export function uploadAvatarApi(file: FormData) {
   return request({ url: '/v1/account/avatar', method: 'post', data: file })
 }
+
+// ============ 微信登录相关API ============
+
+// 获取微信登录二维码
+export function getWechatQrcodeApi() {
+  return request({ url: '/v1/wechat/qrcode', method: 'get' })
+}
+
+// 轮询微信登录结果
+export function getWechatLoginResultApi(sceneId: string) {
+  return request({ url: `/v1/wechat/login/result?sceneId=${sceneId}`, method: 'get' })
+}

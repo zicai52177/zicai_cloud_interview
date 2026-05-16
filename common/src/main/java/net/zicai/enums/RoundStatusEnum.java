@@ -1,4 +1,4 @@
-package net.xdclass.enums;
+package net.zicai.enums;
 
 /**
  * 轮次状态枚举

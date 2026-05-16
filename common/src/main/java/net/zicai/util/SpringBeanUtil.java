@@ -1,5 +1,7 @@
 package net.zicai.util;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.TypeReference;
 import org.springframework.beans.BeanUtils;
 
 import java.util.ArrayList;
@@ -55,6 +57,27 @@ public class SpringBeanUtil {
 
     public static void copyProperties(Object source, Object target){
         BeanUtils.copyProperties(source,target);
+    }
+
+    /**
+     * 对象转JSON字符串
+     *
+     * @param obj 源对象
+     * @return JSON字符串
+     */
+    public static String obj2Json(Object obj) {
+        return JSON.toJSONString(obj);
+    }
+
+    /**
+     * JSON字符串转List
+     *
+     * @param json JSON字符串
+     * @param <T>  目标对象类型
+     * @return 对象列表
+     */
+    public static <T> List<T> json2List(String json, Class<T> clazz) {
+        return JSON.parseArray(json, clazz);
     }
 
 }

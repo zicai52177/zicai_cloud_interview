@@ -1,4 +1,4 @@
-package net.xdclass.enums;
+package net.zicai.enums;
 
 /**
  * 面试状态枚举

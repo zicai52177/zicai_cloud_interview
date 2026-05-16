@@ -2,6 +2,7 @@ package net.zicai.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 public class InterviewCreateMessageDTO {
 
     private Long interviewId;

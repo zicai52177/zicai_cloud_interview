@@ -1,17 +1,17 @@
-package net.xdclass.controller;
+package net.zicai.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import net.xdclass.controller.req.AnswerReq;
-import net.xdclass.controller.req.InterviewCreateReq;
-import net.xdclass.controller.req.InterviewFinishReq;
-import net.xdclass.controller.req.InterviewPageReq;
-import net.xdclass.dto.AccountDTO;
-import net.xdclass.interceptor.AccountLoginInterceptor;
-import net.xdclass.service.InterviewService;
-import net.xdclass.util.JsonData;
+import net.zicai.controller.req.AnswerReq;
+import net.zicai.controller.req.InterviewCreateReq;
+import net.zicai.controller.req.InterviewFinishReq;
+import net.zicai.controller.req.InterviewPageReq;
+import net.zicai.dto.AccountDTO;
+import net.zicai.interceptor.AccountLoginInterceptor;
+import net.zicai.service.InterviewService;
+import net.zicai.util.JsonData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

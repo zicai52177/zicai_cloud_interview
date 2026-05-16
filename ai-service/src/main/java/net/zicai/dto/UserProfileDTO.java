@@ -1,4 +1,4 @@
-package net.xdclass.dto;
+package net.zicai.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
