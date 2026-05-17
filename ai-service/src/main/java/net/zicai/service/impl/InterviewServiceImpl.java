@@ -4,14 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.zicai.component.agent.InterviewGenerationOrchestrator;
 import net.zicai.controller.req.AnswerReq;
 import net.zicai.controller.req.InterviewCreateReq;
 import net.zicai.controller.req.InterviewFinishReq;
 import net.zicai.controller.req.InterviewPageReq;
 import net.zicai.dto.*;
-import net.zicai.enums.BenefitEnum;
-import net.zicai.enums.BizCodeEnum;
-import net.zicai.enums.InterviewStatusEnum;
+import net.zicai.enums.*;
 import net.zicai.feign.AccountBenefitFeign;
 import net.zicai.interceptor.AccountLoginInterceptor;
 import net.zicai.mapper.InterviewMapper;
@@ -23,7 +22,9 @@ import net.zicai.model.InterviewRoundDO;
 import net.zicai.model.QuestionDO;
 import net.zicai.model.ResumeDO;
 import net.zicai.req.BenefitCheckReq;
+import net.zicai.service.BenefitTaskService;
 import net.zicai.service.InterviewService;
+import net.zicai.service.ResumeService;
 import net.zicai.strategy.BenefitMessageStrategy;
 import net.zicai.strategy.BenefitMessageStrategyFactory;
 import net.zicai.util.CommonUtil;
@@ -32,6 +33,7 @@ import net.zicai.util.JsonUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +61,9 @@ public class InterviewServiceImpl implements InterviewService {
     private final ResumeDTO resumeDTO;
     private final AccountBenefitFeign benefitService;
     private final BenefitMessageStrategyFactory strategyFactory;
-
+    private final ResumeService resumeService;
+    private final InterviewGenerationOrchestrator orchestrator;
+    private final BenefitTaskService benefitTaskService;
     @Override
     public JsonData create(InterviewCreateReq req) {
 
@@ -68,7 +72,7 @@ public class InterviewServiceImpl implements InterviewService {
         if (accountDTO == null) {
             return JsonData.buildError("用户不存在");
         }
-        ResumeDO resumeDO = resumeMapper.selectById(accountDTO.getId());
+        ResumeDO resumeDO = resumeMapper.selectById(req.getResumeId());
         if (resumeDO == null){
             return JsonData.buildError("请先上传简历");
         }
@@ -131,8 +135,140 @@ public class InterviewServiceImpl implements InterviewService {
 
     @Override
     public void generateInterview(InterviewCreateMessageDTO messageDTO) {
+        //获取面试信息
+        Long interviewId = messageDTO.getInterviewId();
+        Long accountId = messageDTO.getAccountId();
+        String messageId = messageDTO.getMessageId();
+        String businessId = interviewId.toString();
+        String interviewType = "interview";
+
+        try {
+
+            //获取面试订单状态
+            InterviewDO interviewDO = interviewMapper.selectById(interviewId);
+            if (interviewDO == null) {
+                log.warn("面试记录不存在，messageId={}", messageId);
+                return ;
+            }
+            if (!InterviewStatusEnum.GENERATING.getCode().equals(interviewDO.getStatus())) {
+                log.warn("面试记录状态异常，messageId={}，状态={}", messageId, interviewDO.getStatus());
+                return ;
+            }
+            log.info("开始生成面试题，面试ID：{}", interviewId);
+            //从profile中获取面试信息
+            InterviewCreateReq profile = JsonUtil.json2Obj(interviewDO.getProfile(), InterviewCreateReq.class);
+            if (profile == null){
+                log.error("面试记录profile为空，messageId={}", messageId);
+                return;
+            }
+            //获取简历（使用MQ场景下的accountId）
+            ResumeDTO resumeDTO = null;
+            if (profile.getResumeId() != null) {
+                resumeDTO = resumeService.findByIdAndAccount(profile.getResumeId(), accountId);
+            }
+            if (resumeDTO == null) {
+                log.error("简历不存在，messageId={}", messageId);
+                return;
+            }
+            //获取面试轮次信息
+            log.info("开始生成面试轮次，面试ID：{}", interviewId);
+            InterviewGenerationOrchestrator.PipelineResult pipelineResult = orchestrator.generate(resumeDTO.getContent(), profile);
+            if (pipelineResult == null || pipelineResult.getResumeParseResult() == null
+                    || pipelineResult.getRoundDTOs() == null) {
+                updateInterviewStatus(interviewId, InterviewStatusEnum.FAILED_PARSE_RESUME);
+                benefitTaskService.rollBack(messageId, businessId, interviewType, "简历解析失败");
+                return;
+            }
+            updateInterviewStatus(interviewId, InterviewStatusEnum.GENERATE_ROUND);
+            //保存面试伦次到数据库
+            List<InterviewRoundDO> savedRounds = saveInterviewRounds(
+                    interviewId, accountId, pipelineResult.getRoundDTOs());
+            updateInterviewStatus(interviewId, InterviewStatusEnum.GENERATE_QA);
+            //生成题目
+            Map<Long, List<QuestionDTO>> questionsMap = orchestrator.generateQuestions(profile, pipelineResult.getResumeParseResult(), savedRounds);
+            if (questionsMap == null){
+                updateInterviewStatus(interviewId, InterviewStatusEnum.FAILED_GENERATE_QA);
+                benefitTaskService.rollBack(messageId, businessId, interviewType, "生成题目失败");
+                return;
+            }
+            log.info("题目生成成功，开始保存题目");
+            for (InterviewRoundDO round : savedRounds) {
+                List<QuestionDTO> questions = questionsMap.get(round.getId());
+                if (questions != null && !questions.isEmpty()) {
+                    List<QuestionDO> questionDOList = convertToQuestionDOs(questions, round, accountId);
+                    questionMapper.insertBatch(questionDOList);
+                    log.info("轮次{}题⽬保存成功，题⽬数量：{}", round.getId(), questionDOList.size());
+                }
+            }
+            updateInterviewStatus(interviewId, InterviewStatusEnum.COMPLETED);
+            log.info("面试题保存成功，面试ID：{}", interviewId);
+
+
+
+
+        } catch (Exception e) {
+            log.error("业务MQ消息处理失败，messageId={}，等待延迟检查补偿", messageId, e);
+        }
 
     }
+
+    /**
+     * 转换DTO为QuestionDO
+     * @param questionDTOs
+     * @param round
+     * @param accountId
+     * @return
+     */
+    private List<QuestionDO> convertToQuestionDOs(List<QuestionDTO> questionDTOs,
+                                                  InterviewRoundDO round, Long accountId) {
+        List<QuestionDO> questionDOList = new ArrayList<>();
+        for (QuestionDTO dto : questionDTOs) {
+            QuestionDO questionDO = QuestionDO.builder()
+                    .interviewId(round.getInterviewId())
+                    .accountId(accountId)
+                    .interviewRoundId(round.getId())
+                    .status(QuestionStatusEnum.UNANSWERED.getCode())
+                    .content(dto.getContent())
+                    .type(dto.getType())
+                    .difficulty(dto.getDifficulty())
+                    .category(dto.getCategory())
+                    .standardAnswer(dto.getStandardAnswer())
+                    .keyPoints(dto.getKeyPoints())
+                    .maxScore(dto.getMaxScore() != null ? dto.getMaxScore() : 100)
+                    .timeLimit(dto.getTimeLimit())
+                    .build();
+            questionDOList.add(questionDO);
+        }
+        return questionDOList;
+    }
+
+    /**
+     * 保存面试轮次
+     * @param interviewId
+     * @param accountId
+     * @param roundDTOs
+     * @return
+     */
+    private List<InterviewRoundDO> saveInterviewRounds(Long interviewId, Long accountId,
+                                                       List<AIInterviewRoundDTO> roundDTOs) {
+        List<InterviewRoundDO> roundDOList = new ArrayList<>();
+        for (AIInterviewRoundDTO dto : roundDTOs) {
+            InterviewRoundDO roundDO = InterviewRoundDO.builder()
+                    .interviewId(interviewId)
+                    .accountId(accountId)
+                    .roundNumber(dto.getRoundNumber())
+                    .roundType(dto.getRoundType())
+                    .description(dto.getDescription())
+                    .totalQuestion(dto.getTotalQuestion())
+                    .answeredQuestions(0)                              // 初始已答题数为0
+                    .status(RoundStatusEnum.IN_PROGRESS.getCode())     // 初始状态：进⾏中
+                    .build();
+            roundDOList.add(roundDO);
+        }
+        interviewRoundMapper.insertBatch(roundDOList);  // 批量插⼊
+        return roundDOList;  // 返回带有数据库⾃增ID的对象
+    }
+
 
     @Override
     public JsonData getInterviewStatus(Long interviewId) {

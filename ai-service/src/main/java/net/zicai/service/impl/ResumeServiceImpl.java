@@ -111,15 +111,26 @@ public class ResumeServiceImpl implements ResumeService {
     }
 
     /**
-     * 查询简历详情
+     * 查询简历详情（从threadLocal获取accountId，适用于HTTP请求场景）
      */
     @Override
     public ResumeDTO findById(Long id) {
         AccountDTO accountDTO = AccountLoginInterceptor.threadLocal.get();
+        if (accountDTO == null) {
+            throw new BizException(BizCodeEnum.PARAM_ERROR);
+        }
+        return findByIdAndAccount(id, accountDTO.getId());
+    }
+
+    /**
+     * 根据ID和accountId查询简历（用于MQ异步场景）
+     */
+    @Override
+    public ResumeDTO findByIdAndAccount(Long id, Long accountId) {
         ResumeDO resumeDO = resumeMapper.selectOne(
                 new LambdaQueryWrapper<ResumeDO>()
                         .eq(ResumeDO::getId, id)
-                        .eq(ResumeDO::getAccountId, accountDTO.getId())
+                        .eq(ResumeDO::getAccountId, accountId)
         );
         if (resumeDO == null) {
             throw new BizException(BizCodeEnum.RESUME_NOT_EXIST);

@@ -29,4 +29,11 @@
         id, interview_id, account_id, interview_round_id, status, user_answer, evaluation, content, type, difficulty, category, standard_answer, key_points, max_score, time_limit, user_score, gmt_create, gmt_modified
     </sql>
 
+    <insert id="insertBatch">
+        insert into question (interview_id, account_id, interview_round_id, status, user_answer, evaluation, content, type, difficulty, category, standard_answer, key_points, max_score, time_limit) values
+        <foreach collection="questions" item="item" separator=",">
+            (#{item.interviewId}, #{item.accountId}, #{item.interviewRoundId}, #{item.status}, #{item.userAnswer}, #{item.evaluation}, #{item.content}, #{item.type}, #{item.difficulty}, #{item.category}, #{item.standardAnswer}, #{item.keyPoints}, #{item.maxScore}, #{item.timeLimit})
+        </foreach>
+    </insert>
+
 </mapper>

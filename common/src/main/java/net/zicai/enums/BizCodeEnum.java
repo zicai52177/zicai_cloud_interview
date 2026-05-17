@@ -88,7 +88,7 @@ public enum BizCodeEnum {
 
     REPEAT_SUBMIT_IDEMPOTENT(20001,"重复提交"),
 
-    MQ_CONSUME_EXCEPTION(41231,"消息消费失败" );
+    MQ_CONSUME_EXCEPTION(41231,"消息消费失败" ), PARAM_ERROR(400001,"参数错误");
     private final int code;
     private final String message;
 

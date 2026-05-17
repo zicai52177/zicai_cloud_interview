@@ -31,6 +31,14 @@ public interface ResumeService {
     ResumeDTO findById(Long id);
 
     /**
+     * 根据ID和accountId查询简历（用于MQ异步场景）
+     * @param id 简历ID
+     * @param accountId 账户ID
+     * @return 简历DTO
+     */
+    ResumeDTO findByIdAndAccount(Long id, Long accountId);
+
+    /**
      * 删除简历
      * @param id
      * @return

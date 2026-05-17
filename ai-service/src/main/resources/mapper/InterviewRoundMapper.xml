@@ -27,4 +27,15 @@
         id, interview_id, account_id, round_number, round_type, status, description, total_question, answered_questions, overall_score, summary, strength, improvement, suggestion, gmt_modified, gmt_create
     </sql>
 
+    <!--批量保存round-->
+    <insert id="insertBatch" useGeneratedKeys="true" keyProperty="id">
+        insert into interview_round (interview_id, account_id, round_number, round_type, status, description, total_question, answered_questions)
+        values
+        <foreach collection="roundDOList" item="round" separator=",">
+            (#{round.interviewId}, #{round.accountId}, #{round.roundNumber}, #{round.roundType}, #{round.status}, #{round.description}, #{round.totalQuestion}, #{round.answeredQuestions})
+        </foreach>
+
+    </insert>
+
+
 </mapper>

@@ -48,7 +48,7 @@ public class InterviewGenerationOrchestrator {
                     .includeContents(false)
                     .build();
 
-            // 创建面试轮次Agent
+            // 创建面试轮次Agent（使用resumeInfo变量）
             ReactAgent roundAgent = ReactAgent.builder()
                     .name("面试轮次Agent")
                     .model(chatModel)
@@ -287,7 +287,7 @@ public class InterviewGenerationOrchestrator {
 
     /**
      * 构建轮次生成 instruction
-     * {resume_info} 占位符引用上一个 Agent（resume_analyzer）的 outputKey 输出
+     * {resumeInfo} 占位符引用上一个 Agent（resume_analyzer）的 outputKey 输出
      */
     private String buildRoundInstruction(UserProfileDTO userProfile) {
         boolean isSpecial = BenefitEnum.SPECIAL_INTERVIEW.name().equals(userProfile.getInterviewType());
@@ -297,7 +297,7 @@ public class InterviewGenerationOrchestrator {
                     现在需要为以下候选人设计一套针对性的专项面试轮次方案。
 
                     **候选人简历信息（由上一步简历解析 Agent 输出）：**
-                    {resume_info}
+                    {resumeInfo}
 
                     **专项面试目标内容：**
                     %s
@@ -322,7 +322,7 @@ public class InterviewGenerationOrchestrator {
                     现在需要为以下候选人设计一套科学、专业、针对性强的面试轮次方案。
 
                     **候选人简历信息（由上一步简历解析 Agent 输出）：**
-                    {resume_info}
+                    {resumeInfo}
 
                     **候选人求职目标岗位信息：**
                     - 期望薪资：%s
