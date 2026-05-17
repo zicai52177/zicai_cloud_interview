@@ -64,6 +64,7 @@ public class InterviewServiceImpl implements InterviewService {
     private final ResumeService resumeService;
     private final InterviewGenerationOrchestrator orchestrator;
     private final BenefitTaskService benefitTaskService;
+
     @Override
     public JsonData create(InterviewCreateReq req) {
 
@@ -73,7 +74,7 @@ public class InterviewServiceImpl implements InterviewService {
             return JsonData.buildError("用户不存在");
         }
         ResumeDO resumeDO = resumeMapper.selectById(req.getResumeId());
-        if (resumeDO == null){
+        if (resumeDO == null) {
             return JsonData.buildError("请先上传简历");
         }
         //构建面试DO
@@ -103,7 +104,7 @@ public class InterviewServiceImpl implements InterviewService {
         BenefitCheckReq benefitCheckReq = new BenefitCheckReq(
                 req.getInterviewType(), accountDTO.getId(), businessId, 1);
         JsonData jsonData = benefitService.checkAndDeductBenefit(benefitCheckReq);
-        if (jsonData.getCode()!=0) {
+        if (jsonData.getCode() != 0) {
             log.warn("权益扣减失败，⽤户：{}，权益编码：{}，错误：{}",
                     accountDTO.getId(), req.getInterviewType(), jsonData.getMsg());
             interviewMapper.deleteById(interviewId);
@@ -148,16 +149,16 @@ public class InterviewServiceImpl implements InterviewService {
             InterviewDO interviewDO = interviewMapper.selectById(interviewId);
             if (interviewDO == null) {
                 log.warn("面试记录不存在，messageId={}", messageId);
-                return ;
+                return;
             }
             if (!InterviewStatusEnum.GENERATING.getCode().equals(interviewDO.getStatus())) {
                 log.warn("面试记录状态异常，messageId={}，状态={}", messageId, interviewDO.getStatus());
-                return ;
+                return;
             }
             log.info("开始生成面试题，面试ID：{}", interviewId);
             //从profile中获取面试信息
             InterviewCreateReq profile = JsonUtil.json2Obj(interviewDO.getProfile(), InterviewCreateReq.class);
-            if (profile == null){
+            if (profile == null) {
                 log.error("面试记录profile为空，messageId={}", messageId);
                 return;
             }
@@ -186,7 +187,7 @@ public class InterviewServiceImpl implements InterviewService {
             updateInterviewStatus(interviewId, InterviewStatusEnum.GENERATE_QA);
             //生成题目
             Map<Long, List<QuestionDTO>> questionsMap = orchestrator.generateQuestions(profile, pipelineResult.getResumeParseResult(), savedRounds);
-            if (questionsMap == null){
+            if (questionsMap == null) {
                 updateInterviewStatus(interviewId, InterviewStatusEnum.FAILED_GENERATE_QA);
                 benefitTaskService.rollBack(messageId, businessId, interviewType, "生成题目失败");
                 return;
@@ -202,10 +203,6 @@ public class InterviewServiceImpl implements InterviewService {
             }
             updateInterviewStatus(interviewId, InterviewStatusEnum.COMPLETED);
             log.info("面试题保存成功，面试ID：{}", interviewId);
-
-
-
-
         } catch (Exception e) {
             log.error("业务MQ消息处理失败，messageId={}，等待延迟检查补偿", messageId, e);
         }
@@ -214,6 +211,7 @@ public class InterviewServiceImpl implements InterviewService {
 
     /**
      * 转换DTO为QuestionDO
+     *
      * @param questionDTOs
      * @param round
      * @param accountId
@@ -244,6 +242,7 @@ public class InterviewServiceImpl implements InterviewService {
 
     /**
      * 保存面试轮次
+     *
      * @param interviewId
      * @param accountId
      * @param roundDTOs
