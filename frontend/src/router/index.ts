@@ -33,7 +33,19 @@ const routes: RouteRecordRaw[] = [
         meta: { title: 'AI面试' },
       },
       {
-        path: 'interview/:id',
+        path: 'interview/create',
+        name: 'InterviewCreate',
+        component: () => import('@/views/interview/create.vue'),
+        meta: { title: '创建面试' },
+      },
+      {
+        path: 'interview/conduct/:id',
+        name: 'InterviewConduct',
+        component: () => import('@/views/interview/conduct.vue'),
+        meta: { title: '面试进行中' },
+      },
+      {
+        path: 'interview/detail/:id',
         name: 'InterviewDetail',
         component: () => import('@/views/interview/detail.vue'),
         meta: { title: '面试详情' },
