@@ -100,7 +100,7 @@
       <div v-else class="empty-state">
         <el-empty description="暂无面试记录">
           <template #image>
-            <el-icon :size="80" class="empty-icon"><Interview /></el-icon>
+            <el-icon :size="80" class="empty-icon"><Microphone /></el-icon>
           </template>
           <el-button type="primary" @click="goToCreate">开始您的第一次面试</el-button>
         </el-empty>
@@ -124,10 +124,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Plus, Search, Clock, Reading, Loading, Interview } from '@element-plus/icons-vue'
+import { Plus, Search, Clock, Reading, Loading, Microphone } from '@element-plus/icons-vue'
 import { getInterviewListApi, deleteInterviewApi } from '@/api/interview'
 import type { InterviewDTO } from '@/api/interview'
 
@@ -218,13 +218,13 @@ function goToDetail(item: InterviewDTO) {
 }
 
 // 状态相关
-function getStatusType(status: string) {
-  const map: Record<string, string> = {
+function getStatusType(status: string): 'success' | 'warning' | 'info' | 'danger' | undefined {
+  const map: Record<string, 'success' | 'warning' | 'info' | 'danger'> = {
     PROCESSING: 'warning',
     FINISHED: 'success',
     CANCELLED: 'info'
   }
-  return map[status] || 'info'
+  return map[status]
 }
 
 function getStatusText(status: string) {

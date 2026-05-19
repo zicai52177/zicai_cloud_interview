@@ -204,13 +204,13 @@ async function handleDelete() {
 }
 
 // 状态相关
-function getStatusType(status?: string) {
-  const map: Record<string, string> = {
+function getStatusType(status?: string): 'success' | 'warning' | 'info' | 'danger' | undefined {
+  const map: Record<string, 'success' | 'warning' | 'info' | 'danger'> = {
     PROCESSING: 'warning',
     FINISHED: 'success',
     CANCELLED: 'info'
   }
-  return map[status || ''] || 'info'
+  return map[status || '']
 }
 
 function getStatusText(status?: string) {

@@ -60,12 +60,11 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { ArrowDown } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/user'
 
 const route = useRoute()
-const router = useRouter()
 const userStore = useUserStore()
 
 const activeMenu = computed(() => route.path)
@@ -80,11 +79,6 @@ function formatDate(dateStr: string | undefined): string {
   if (!dateStr) return '-'
   const date = new Date(dateStr)
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-}
-
-function handleLogout() {
-  userStore.logout()
-  router.push('/login')
 }
 </script>
 

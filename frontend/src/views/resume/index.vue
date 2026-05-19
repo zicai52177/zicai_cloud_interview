@@ -310,7 +310,7 @@ async function handleViewResult(row: any) {
 }
 
 // 获取状态标签类型和文本
-function getStatusInfo(status: string) {
+function getStatusInfo(status: string): { type: 'success' | 'warning' | 'info' | 'danger' | undefined; text: string; showButton: boolean } {
   switch (status) {
     case 'UPLOADED':
       return { type: 'info', text: '待分析', showButton: true }
@@ -321,7 +321,7 @@ function getStatusInfo(status: string) {
     case 'ERROR':
       return { type: 'danger', text: '分析失败', showButton: true }
     default:
-      return { type: 'info', text: '未知', showButton: false }
+      return { type: undefined, text: '未知', showButton: false }
   }
 }
 

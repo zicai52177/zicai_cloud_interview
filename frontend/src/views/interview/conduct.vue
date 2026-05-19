@@ -184,7 +184,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import {
   Microphone,
   Loading,
@@ -241,7 +241,7 @@ const progressColors = [
 
 const totalQuestions = computed(() => {
   if (!interviewDetail.value?.rounds) return 0
-  return interviewDetail.value.rounds.reduce((sum, round) => sum + (round.questions?.length || 0), 0)
+  return interviewDetail.value.rounds.reduce((sum: number, round: { questions?: Array<{ content: string }> }) => sum + (round.questions?.length || 0), 0)
 })
 
 const currentRound = computed(() => {
@@ -265,10 +265,8 @@ async function fetchInterviewStatus() {
 
   statusLoading.value = true
   try {
-    const res = await getInterviewStatusApi(interviewId.value)
-    if (res.data) {
-      interviewInfo.value.position = res.data.position || interviewInfo.value.position
-    }
+    await getInterviewStatusApi(interviewId.value)
+    // 保持已有position或使用从详情获取的
   } catch (e) {
     // handled by request interceptor
   } finally {
@@ -304,8 +302,8 @@ function loadChatHistory() {
 
   const history: Array<{ type: 'ai' | 'user'; content: string }> = []
 
-  interviewDetail.value.rounds.forEach((round, roundIdx) => {
-    round.questions?.forEach((question) => {
+  interviewDetail.value.rounds.forEach((round: { questions?: Array<{ content: string; answer?: string }> }) => {
+    round.questions?.forEach((question: { content: string; answer?: string }) => {
       // 添加AI问题
       history.push({
         type: 'ai',
