@@ -16,7 +16,7 @@ export function getBannerListApi() {
 }
 
 // 创建套餐订单
-export function createPackageOrderApi(data: { PackageId: number; payType: string; discount?: number }) {
+export function createPackageOrderApi(data: { packageId: number; payType: string; discount?: number }) {
   return request({ url: '/v1/order/package/create', method: 'post', data })
 }
 
