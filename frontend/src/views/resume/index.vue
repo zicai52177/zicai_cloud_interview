@@ -805,4 +805,137 @@ function formatDate(dateStr: string) {
     justify-content: center;
   }
 }
+
+/* 手机端适配 */
+@media (max-width: 600px) {
+  .resume-page {
+    padding: 0 0 24px 0;
+  }
+
+  .page-header {
+    padding: 24px 16px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+  }
+
+  .page-title {
+    font-size: 22px;
+  }
+
+  .page-desc {
+    font-size: 13px;
+  }
+
+  /* 表格响应式 */
+  .resume-table :deep(.el-table__body-wrapper) {
+    overflow-x: auto;
+  }
+
+  /* 操作按钮在手机上 */
+  .action-btns {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .action-btns .el-button {
+    width: 100%;
+    margin: 0 !important;
+  }
+
+  /* 分析结果弹窗 */
+  .result-dialog {
+    margin: 10px !important;
+    width: calc(100% - 20px) !important;
+  }
+
+  .result-dialog :deep(.el-dialog__body) {
+    padding: 16px;
+  }
+
+  .result-content {
+    max-height: 55vh;
+  }
+
+  .result-section {
+    margin-bottom: 20px;
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .section-header h4 {
+    font-size: 14px;
+  }
+
+  /* 技能标签 */
+  .skill-tags {
+    gap: 8px;
+  }
+
+  .skill-tag {
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+
+  /* 描述列表 */
+  .result-descriptions :deep(.el-descriptions__label) {
+    font-size: 12px;
+  }
+
+  .result-descriptions :deep(.el-descriptions__content) {
+    font-size: 12px;
+  }
+
+  /* 卡片样式 */
+  .analysis-card {
+    padding: 12px;
+  }
+
+  .card-label {
+    font-size: 13px;
+  }
+
+  .analysis-card li {
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  /* 建议列表 */
+  .suggestion-item {
+    padding: 12px;
+  }
+
+  .suggestion-item ul li {
+    font-size: 12px;
+  }
+
+  /* 整体评价 */
+  .evaluation-box {
+    padding: 12px;
+  }
+
+  .evaluation-box pre {
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  /* 弹窗底部按钮 */
+  .dialog-footer {
+    flex-direction: column-reverse;
+  }
+
+  .dialog-footer .el-button {
+    width: 100%;
+  }
+
+  /* 卡片头部 */
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .resume-count {
+    align-self: flex-start;
+  }
+}
 </style>

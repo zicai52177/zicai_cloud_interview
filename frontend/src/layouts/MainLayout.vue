@@ -316,4 +316,41 @@ function handleLogout() {
     display: none;
   }
 }
+
+/* 手机端适配 */
+@media (max-width: 600px) {
+  .header {
+    padding: 0 12px;
+    height: 56px;
+  }
+
+  .logo-icon {
+    font-size: 24px;
+  }
+
+  .nav-menu :deep(.el-menu-item) {
+    padding: 0 8px !important;
+    height: 56px;
+    line-height: 56px;
+  }
+
+  .nav-menu :deep(.el-menu-item .el-icon) {
+    font-size: 16px;
+    margin-right: 0;
+  }
+
+  .user-info {
+    padding: 6px 8px;
+  }
+
+  .user-info :deep(.el-avatar) {
+    width: 28px !important;
+    height: 28px !important;
+    line-height: 28px !important;
+  }
+
+  .main-content {
+    padding: 16px 12px;
+  }
+}
 </style>

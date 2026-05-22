@@ -708,4 +708,176 @@ function handleLogout() {
   color: #909399;
   font-size: 14px;
 }
+
+/* ========== 响应式布局 ========== */
+
+/* 小屏幕（平板） */
+@media (max-width: 900px) {
+  /* el-row 响应式 */
+  .user-page :deep(.el-row) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 左右列全宽 */
+  .user-page :deep(.el-col-8),
+  .user-page :deep(.el-col-16) {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100%;
+  }
+
+  /* 功能卡片两列 */
+  .user-page :deep(.el-col-12) {
+    width: 50% !important;
+    max-width: 50% !important;
+    flex: 0 0 50%;
+  }
+
+  /* 欢迎区域 */
+  .welcome-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .welcome-stats {
+    padding-left: 0;
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    padding-top: 20px;
+    margin-top: 20px;
+  }
+
+  .welcome-info h1 {
+    font-size: 20px;
+  }
+
+  /* 欢迎区域的内边距 */
+  .welcome-section {
+    padding: 24px 16px;
+  }
+}
+
+/* 手机端 */
+@media (max-width: 600px) {
+  /* 主容器 */
+  .user-page {
+    padding: 0 0 30px 0;
+  }
+
+  .user-page :deep(.el-card) {
+    border-radius: 12px;
+  }
+
+  /* 欢迎区域 */
+  .welcome-section {
+    padding: 20px 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+  }
+
+  .welcome-avatar :deep(.el-avatar) {
+    width: 56px !important;
+    height: 56px !important;
+  }
+
+  .welcome-info h1 {
+    font-size: 18px;
+  }
+
+  .welcome-info p {
+    font-size: 12px;
+  }
+
+  .welcome-stats {
+    gap: 24px;
+    justify-content: center;
+  }
+
+  .stat-value {
+    font-size: 22px;
+  }
+
+  /* 功能卡片单列 */
+  .user-page :deep(.el-col-12) {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100%;
+  }
+
+  .user-page :deep(.el-row:last-child) {
+    margin-top: 16px !important;
+  }
+
+  .feature-card {
+    height: auto;
+    min-height: 100px;
+    padding: 16px;
+  }
+
+  .feature-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+    border-radius: 10px;
+  }
+
+  .feature-content h3 {
+    font-size: 14px;
+  }
+
+  .feature-content p {
+    font-size: 12px;
+  }
+
+  .arrow-icon {
+    right: 12px;
+  }
+
+  /* 快捷操作 */
+  .quick-actions {
+    margin-top: 16px;
+  }
+
+  .action-list {
+    flex-wrap: wrap;
+  }
+
+  .action-item {
+    flex: 0 0 calc(50% - 8px);
+    padding: 12px 8px;
+  }
+
+  .action-item span {
+    font-size: 13px;
+  }
+
+  /* 操作按钮 */
+  .profile-actions {
+    flex-direction: column;
+  }
+
+  /* 个人信息卡片 */
+  .profile-info {
+    gap: 12px;
+  }
+
+  .info-item {
+    padding: 4px 0;
+  }
+
+  .info-label {
+    min-width: 50px;
+    font-size: 13px;
+  }
+
+  .info-value {
+    font-size: 13px;
+  }
+
+  /* 头像编辑图标 */
+  .avatar-edit-icon {
+    opacity: 1;
+  }
+}
 </style>
