@@ -8,6 +8,27 @@ spring:
         username: ${NACOS_USER}
         password: ${NACOS_PASSWORD}
 
+  # DashScope AI 配置
+  ai:
+    dashscope:
+      api-key: ${ALIBABA_BAILIAN_KEY}
+      chat:
+        options:
+          model: qwen-max
+          temperature: 0.7
+          max-tokens: 2048
+    mcp:
+      client:
+        enabled: true
+        type: SYNC
+        request-timeout: 300s
+        toolcallback:
+          enabled: true
+        streamable-http:
+          connections:
+            mcp-server:
+              url: ${MCP_SERVER_URL}/mcp
+
   rabbitmq:
     host: ${RABBITMQ_SERVER}
     port: 5672
@@ -25,7 +46,7 @@ spring:
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
     hikari:
-      max-lifetime: 300000         # 5分钟，单位毫秒
+      max-lifetime: 300000
       connection-timeout: 30000
       validation-timeout: 5000
       idle-timeout: 60000
@@ -34,16 +55,24 @@ spring:
       pool-name: HikariCP
   hikari:
     max-lifetime: 60000
-    connection-test-query: SELECT 1  # MySQL 验证语句
+    connection-test-query: SELECT 1
   #  redis配置
   data:
     redis:
       host: ${REDIS_SERVER}
       port: 6379
       password: ${REDIS_PASSWORD}
+
 #  锁配置 防止不同环境争抢一把锁
 lock:
-  prefix-key: pord
+  prefix-key: prod
+
+# Flyway
+spring.flyway:
+  enabled: true
+  baseline-on-migrate: true
+  baseline-version: 0
+  locations: classpath:db/migration
 
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
@@ -51,6 +80,17 @@ mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+aliyun:
+  oss:
+    access-key-id: ${OSS_ACCESS_KEY_ID}
+    access-key-secret: ${OSS_ACCESS_KEY_SECRET}
+    secure-endpoint: oss-cn-beijing.aliyuncs.com
+    secure-bucket-name: zccloud-interview-pri
+    secure-domain: https://zccloud-interview-pri.oss-cn-beijing.aliyuncs.com/
+    public-endpoint: oss-cn-beijing.aliyuncs.com
+    public-bucket-name: zccloud-interview-pub
+    public-domain: https://zccloud-interview-pub.oss-cn-beijing.aliyuncs.com/
 
 knife4j:
   enable: false
@@ -64,3 +104,17 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
+
+# SearXNG 搜索引擎配置
+searxng:
+  base-url: ${SEARXNG_SERVER}
+  format: json
+  language: zh
+  engines: bing,baidu
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+
+feign:
+  internal:
+    secret: ${FEIGN_INTERNAL_SECRET}

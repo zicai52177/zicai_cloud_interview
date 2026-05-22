@@ -25,7 +25,7 @@ spring:
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
     hikari:
-      max-lifetime: 300000         # 5分钟，单位毫秒
+      max-lifetime: 300000
       connection-timeout: 30000
       validation-timeout: 5000
       idle-timeout: 60000
@@ -34,16 +34,24 @@ spring:
       pool-name: HikariCP
   hikari:
     max-lifetime: 60000
-    connection-test-query: SELECT 1  # MySQL 验证语句
+    connection-test-query: SELECT 1
   #  redis配置
   data:
     redis:
       host: ${REDIS_SERVER}
       port: 6379
       password: ${REDIS_PASSWORD}
+
 #  锁配置 防止不同环境争抢一把锁
 lock:
-  prefix-key: pord
+  prefix-key: prod
+
+# Flyway
+spring.flyway:
+  enabled: true
+  baseline-on-migrate: true
+  baseline-version: 0
+  locations: classpath:db/migration
 
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
@@ -51,6 +59,12 @@ mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 短信配置
+sms:
+  app-code: ${SMS_APP_CODE}
+  sms-sign-id: 2e65b1bb3d054466b82f0c9d125465e2
+  template-id: 908e94ccf08b4476ba6c876d13f084ad
 
 knife4j:
   enable: false
@@ -64,3 +78,42 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
+
+# Aliyun OSS 配置
+aliyun:
+  oss:
+    access-key-id: ${OSS_ACCESS_KEY_ID}
+    access-key-secret: ${OSS_ACCESS_KEY_SECRET}
+    secure-endpoint: oss-cn-beijing.aliyuncs.com
+    secure-bucket-name: zccloud-interview-pri
+    secure-domain: https://zccloud-interview-pri.oss-cn-beijing.aliyuncs.com/
+    public-endpoint: oss-cn-beijing.aliyuncs.com
+    public-bucket-name: zccloud-interview-pub
+    public-domain: https://zccloud-interview-pub.oss-cn-beijing.aliyuncs.com/
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+
+feign:
+  internal:
+    secret: ${FEIGN_INTERNAL_SECRET}
+
+# 微信登录配置
+wechat:
+  login:
+    app-id: ${WECHAT_APP_ID}
+    app-secret: ${WECHAT_APP_SECRET}
+    qr-code-expire-time: 120
+    login-state-expire-time: 300
+    token: ${WECHAT_TOKEN}
+
+  # 微信支付配置
+  pay:
+    mch-id: ${WECHAT_PAY_MCH_ID}
+    app-id: ${WECHAT_PAY_APP_ID:wx731dc40c4097e341}
+    cert-serial-no: ${WECHAT_PAY_CERT_SERIAL_NO}
+    api-v3-key: ${WECHAT_PAY_API_V3_KEY}
+    private-key-path: ${WECHAT_PAY_PRIVATE_KEY_PATH:/opt/app/cert/apiclient_key.pem}
+    public-key-path: ${WECHAT_PAY_PUBLIC_KEY_PATH:/opt/app/cert/pub_key.pem}
+    public-key-id: ${WECHAT_PAY_PUBLIC_KEY_ID}
+    notify-url: ${WECHAT_PAY_NOTIFY_URL}
