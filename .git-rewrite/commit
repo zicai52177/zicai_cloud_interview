@@ -1,0 +1,17 @@
+tree 51f1ddd8dd46f6a6cf24335eea108a6fe97ae2f9
+parent 9829647b6c9523a303755298e5dd358d7f0c6b55
+author jufajeror1-afk <jufajeror14@gmail.com> 1778429422 +0800
+committer jufajeror1-afk <jufajeror14@gmail.com> 1778429422 +0800
+
+feat(product-service): 完善订单和支付相关功能
+
+- 为订单状态OrderStateEnum添加未支付、已支付和超时取消状态注释
+- 为订单类型OrderTypeEnum添加套餐和权益订单类型注释
+- 为支付方式PaymentEnum添加微信支付、支付宝和银行卡注释
+- product-service模块pom.xml中增加spring-boot-starter-test测试依赖
+- 实现ProducktOderController，添加REST控制器注解和依赖注入
+- 完善PayInfoDTO，增加支付信息相关字段及Lombok注解
+- 完善ProductOrderDTO，添加订单属性和Swagger注解
+- 定义ProductOrderService接口，作为订单服务契约
+- 实现ProductOrderServiceImpl，支持微信Native支付逻辑处理
+- 新增WechatPayUtil集成测试类，覆盖微信支付下单、查询、关闭流程，确保支付功能稳定

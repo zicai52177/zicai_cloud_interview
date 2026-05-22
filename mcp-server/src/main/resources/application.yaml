@@ -1,0 +1,42 @@
+server:
+  port: ${SERVER_PORT:8090}
+
+spring:
+  application:
+    name: xd-mcp-server
+
+  mvc:
+    async:
+      request-timeout: -1  # SSE长连接保持，不超时
+
+  ai:
+    dashscope:
+      api-key: ${DASHSCOPE_API_KEY:sk-b7b3695e01d14457b1285b213492baf3}
+      chat:
+        options:
+          model: ${AI_MODEL:deepseek-v4-pro}
+    mcp:
+      server:
+        enabled: true
+        name: xdclass-mcp-server
+        version: 1.0.0
+        type: SYNC
+        #        区别说明：
+        #        STREAMABLE - 有状态，服务端仍维护session
+        #        STATELESS - 真正无状态，请求间不维护任何会话，专为云原生/Serverless设计
+        protocol: STATELESS  # 无状态模式，完美适配FC/Serverless环境 https://www.spring-doc.cn/spring-ai/1.1.0/api_mcp_mcp-stateless-server-boot-starter-docs.html
+
+        stateless:
+          mcp-endpoint: /mcp  # 无状态HTTP端点
+        annotation-scanner:
+          enabled: true
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.xdclass.ai.server: DEBUG
+    org.springframework.ai: DEBUG
+    org.springframework.ai.mcp: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

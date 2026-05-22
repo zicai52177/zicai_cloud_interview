@@ -1,0 +1,119 @@
+# 开发环境
+spring:
+  # nacos配置，需要改为服务器ip
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER}
+        username: ${NACOS_USER}
+        password: ${NACOS_PASSWORD}
+  ai:
+    dashscope:
+      api-key: ${ALIBABA_BAILIAN_KEY}
+      chat:
+        options:
+          model: qwen-max        # 模型选择，可选 qwen-plus、qwen-turbo
+          temperature: 0.7       # 创造性（0-1，越高越随机）
+          max-tokens: 2048       # 最大输出 Token 数
+    mcp:
+      client:
+        enabled: true
+        type: SYNC
+        request-timeout: 300s
+        toolcallback:
+          enabled: true
+        # 使用Streamable HTTP连接（无状态，适配FC/Serverless环境）
+        streamable-http:
+          connections:
+            mcp-server:
+              url: ${MCP_SERVER_URL}/mcp
+  rabbitmq:
+    host: ${RABBITMQ_SERVER}
+    port: 5672
+    virtual-host: /
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
+    listener:
+      simple:
+        acknowledge-mode: manual
+
+  # db
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_SERVER}:3306/ai_db?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+    hikari:
+      max-lifetime: 300000         # 5分钟，单位毫秒
+      connection-timeout: 30000
+      validation-timeout: 5000
+      idle-timeout: 60000
+      minimum-idle: 5
+      maximum-pool-size: 20
+      pool-name: HikariCP
+  hikari:
+    max-lifetime: 60000
+    connection-test-query: SELECT 1  # MySQL 验证语句
+  #  redis配置
+  data:
+    redis:
+      host: ${REDIS_SERVER}
+      port: 6300
+      password: ${REDIS_PASSWORD}
+#  锁配置 防止不同环境争抢一把锁
+lock:
+  prefix-key: dev
+
+# Flyway
+spring.flyway:
+  enabled: true
+  baseline-on-migrate: true
+  baseline-version: 0
+  locations: classpath:db/migration
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: net.zicai.model
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+aliyun:
+  oss:
+    access-key-id: ${OSS_ACCESS_KEY_ID}
+    access-key-secret: ${OSS_ACCESS_KEY_SECRET}
+
+    secure-endpoint: oss-cn-beijing.aliyuncs.com
+    secure-bucket-name: zccloud-interview-pri
+    secure-domain: https://zccloud-interview-pri.oss-cn-beijing.aliyuncs.com/
+
+    public-endpoint: oss-cn-beijing.aliyuncs.com
+    public-bucket-name: zccloud-interview-pub
+    public-domain: https://zccloud-interview-pub.oss-cn-beijing.aliyuncs.com/
+
+knife4j:
+  enable: false
+
+springdoc:
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: net.zicai.controller
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+# SearXNG 搜索引擎配置
+searxng:
+  base-url: #{SEARXNG_SERVER} # SearXNG 服务地址
+  format: json                          # 返回格式，必须为 json
+  language: zh                          # 搜索语言
+  engines: bing,baidu                        # 搜索引擎（多个用逗号分隔，如：bing,google）
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+
+feign:
+  internal:
+    secret: ${FEIGN_INTERNAL_SECRET:}

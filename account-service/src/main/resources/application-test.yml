@@ -1,0 +1,93 @@
+# 生产环境
+spring:
+  # nacos配置，需要改为服务器ip
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER}
+        username: ${NACOS_USER}
+        password: ${NACOS_PASSWORD}
+
+  rabbitmq:
+    host: ${RABBITMQ_SERVER}
+    port: 5672
+    virtual-host: /
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
+    listener:
+      simple:
+        acknowledge-mode: manual
+
+  # db
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_SERVER}:3306/account_db?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+    hikari:
+      max-lifetime: 300000         # 5分钟，单位毫秒
+      connection-timeout: 30000
+      validation-timeout: 5000
+      idle-timeout: 60000
+      minimum-idle: 5
+      maximum-pool-size: 20
+      pool-name: HikariCP
+  hikari:
+    max-lifetime: 60000
+    connection-test-query: SELECT 1  # MySQL 验证语句
+  #  redis配置
+  data:
+    redis:
+      host: ${REDIS_SERVER}
+      port: 6379
+      password: ${REDIS_PASSWORD}
+#  锁配置 防止不同环境争抢一把锁
+lock:
+  prefix-key: prod
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: net.zicai.model
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 短信配置
+sms:
+  app-code: ${SMS_APP_CODE}
+  sms-sign-id: 2e65b1bb3d054466b82f0c9d125465e2
+  template-id: 908e94ccf08b4476ba6c876d13f084ad
+
+knife4j:
+  enable: false
+
+springdoc:
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: net.zicai.controller
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+aliyun:
+  oss:
+    access-key-id: ${OSS_ACCESS_KEY_ID:test-key}           # 访问密钥ID
+    access-key-secret: ${OSS_ACCESS_KEY_SECRET:test-secret}      # 访问密钥Secret
+
+    secure-endpoint: oss-cn-beijing.aliyuncs.com    # 加密bucket访问域名
+    secure-bucket-name: zccloud-interview-pri          # 加密访问的存储桶
+    secure-domain: https://zccloud-interview-pri.oss.b-pri.aizicai.com/    # 加密访问的域名
+
+    public-endpoint: oss-cn-beijing.aliyuncs.com    # 公开bucket访问域名
+    public-bucket-name: zccloud-interview-pub         # 公开访问的存储桶（头像/题图）
+    public-domain: https://zccloud-interview-pub.oss.b-pri.aizicai.com/  # 公开访问域名
+
+wechat:
+  login:
+    app-id: ${WECHAT_APP_ID}
+    app-secret: ${WECHAT_APP_SECRET}
+    qr-code-expire-time: 120
+    login-state-expire-time: 300
+    token: ${WECHAT_TOKEN}
