@@ -45,6 +45,9 @@ spring:
                 - Path=/api/v1/ai/**,/api/v1/resume/**,/api/v1/interview/**
               filters:
                 - StripPrefix=0
+                - name: RequestSize
+                  args:
+                    maxSize: 10MB
 
             # ========== Product Service (9003) ==========
             - id: product-service
