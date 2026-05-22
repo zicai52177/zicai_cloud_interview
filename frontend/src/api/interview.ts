@@ -186,12 +186,12 @@ export function uploadResumeApi(formData: FormData) {
 
 /**
  * 分析简历
- * POST /api/v1/resume/analyse
+ * GET /api/v1/resume/analyse
  */
 export function analyseResumeApi(resumeId: number) {
   return request<boolean>({
     url: '/v1/resume/analyse',
-    method: 'post',
+    method: 'get',
     params: { id: resumeId }
   })
 }

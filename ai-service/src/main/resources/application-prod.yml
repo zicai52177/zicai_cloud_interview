@@ -118,3 +118,10 @@ jwt:
 feign:
   internal:
     secret: ${FEIGN_INTERNAL_SECRET}
+
+# 文件上传配置
+spring.servlet:
+  multipart:
+    enabled: true
+    max-file-size: 10MB
+    max-request-size: 10MB
