@@ -25,6 +25,11 @@ export function uploadAvatarApi(file: FormData) {
   return request({ url: '/v1/account/avatar', method: 'post', data: file })
 }
 
+// 更新邮箱
+export function updateEmailApi(email: string) {
+  return request({ url: '/v1/account/email', method: 'post', params: { email } })
+}
+
 // ============ 微信登录相关API ============
 
 // 获取微信登录二维码

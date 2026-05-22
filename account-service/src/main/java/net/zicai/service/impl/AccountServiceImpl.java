@@ -177,6 +177,38 @@ public class AccountServiceImpl implements AccountService {
     }
 
     /**
+     * 上传/更新邮箱
+     * @param email 邮箱地址
+     * @return JsonData
+     */
+    @Override
+    public JsonData uploadEmail(String email) {
+        // 1. 校验邮箱格式
+        if (!CommonUtil.isEmail(email)) {
+            log.warn("邮箱格式不正确, email:{}", email);
+            return JsonData.buildResult(BizCodeEnum.CODE_TO_ERROR);
+        }
+
+        // 2. 获取当前登录用户信息
+        AccountDTO accountDTO = AccountLoginInterceptor.threadLocal.get();
+        Long accountId = accountDTO.getId();
+
+        // 3. 更新数据库中的邮箱字段
+        int updated = accountMapper.update(
+                AccountDO.builder().email(email).build(),
+                new LambdaQueryWrapper<AccountDO>().eq(AccountDO::getId, accountId)
+        );
+
+        if (updated <= 0) {
+            log.error("更新用户邮箱失败, accountId:{}", accountId);
+            return JsonData.buildResult(BizCodeEnum.SYSTEM_ERROR);
+        }
+
+        log.info("邮箱更新成功, accountId:{}, email:{}", accountId, email);
+        return JsonData.buildSuccess(email);
+    }
+
+    /**
      * 判断验证码
      */
     private boolean verifyIdentifierCode(String identifier, String checkCode, String type) {

@@ -18,19 +18,19 @@ const routes: RouteRecordRaw[] = [
         path: 'home',
         name: 'Home',
         component: () => import('@/views/home/index.vue'),
-        meta: { title: '首页' },
+        meta: { title: '首页', keepAlive: true },
       },
       {
         path: 'resume',
         name: 'Resume',
         component: () => import('@/views/resume/index.vue'),
-        meta: { title: '简历管理' },
+        meta: { title: '简历管理', keepAlive: true },
       },
       {
         path: 'interview',
         name: 'Interview',
         component: () => import('@/views/interview/index.vue'),
-        meta: { title: 'AI面试' },
+        meta: { title: 'AI面试', keepAlive: true },
       },
       {
         path: 'interview/create',
@@ -54,13 +54,13 @@ const routes: RouteRecordRaw[] = [
         path: 'product',
         name: 'Product',
         component: () => import('@/views/product/index.vue'),
-        meta: { title: '套餐中心' },
+        meta: { title: '套餐中心', keepAlive: true },
       },
       {
         path: 'order',
         name: 'Order',
         component: () => import('@/views/order/index.vue'),
-        meta: { title: '我的订单' },
+        meta: { title: '我的订单', keepAlive: true },
       },
       {
         path: 'user',

@@ -22,4 +22,6 @@ public interface AccountService {
     AccountDTO findById();
 
     JsonData uploadAvatar(MultipartFile file);
+
+    JsonData uploadEmail(String email);
 }

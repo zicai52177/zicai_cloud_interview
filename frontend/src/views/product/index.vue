@@ -29,7 +29,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getPackagesApi, createPackageOrderApi } from '@/api/product'
+import { createPackageOrderApi } from '@/api/product'
+import { useCacheStore } from '@/store/cache'
+
+const cacheStore = useCacheStore()
 
 const packageList = ref<any[]>([])
 const loading = ref(false)
@@ -37,8 +40,8 @@ const loading = ref(false)
 onMounted(async () => {
   loading.value = true
   try {
-    const res = await getPackagesApi()
-    packageList.value = res.data || []
+    // 从缓存获取（5分钟有效）
+    packageList.value = await cacheStore.getPackageList()
   } catch (e) {
     // handled
   } finally {
@@ -49,7 +52,7 @@ onMounted(async () => {
 async function handleBuy(pkg: any) {
   try {
     await ElMessageBox.confirm(`确认购买「${pkg.name}」，金额 ¥${pkg.price}？`, '确认购买')
-    const res = await createPackageOrderApi({ PackageId: pkg.id, payType: 'WECHAT_PAY' })
+    const res = await createPackageOrderApi({ packageId: pkg.id, payType: 'WECHAT_PAY' })
     if (res.data?.codeUrl) {
       ElMessage.success('订单创建成功，请扫码支付')
       // TODO: 展示支付二维码

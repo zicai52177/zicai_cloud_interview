@@ -163,38 +163,35 @@ export function deleteInterviewApi(interviewId: number) {
 
 /**
  * 获取简历列表
- * GET /api/v1/interview/resume/list
+ * GET /api/v1/resume/list
  */
 export function getResumeListApi() {
   return request<any[]>({
-    url: '/v1/interview/resume/list',
+    url: '/v1/resume/list',
     method: 'get'
   })
 }
 
 /**
  * 上传简历
- * POST /api/v1/interview/resume/upload
+ * POST /api/v1/resume/upload
  */
 export function uploadResumeApi(formData: FormData) {
   return request<any>({
-    url: '/v1/interview/resume/upload',
+    url: '/v1/resume/upload',
     method: 'post',
-    data: formData,
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+    data: formData
   })
 }
 
 /**
  * 分析简历
- * POST /api/v1/interview/resume/analyze
+ * POST /api/v1/resume/analyse
  */
 export function analyseResumeApi(resumeId: number) {
   return request<boolean>({
-    url: '/v1/interview/resume/analyze',
+    url: '/v1/resume/analyse',
     method: 'post',
-    data: { resumeId }
+    params: { id: resumeId }
   })
 }

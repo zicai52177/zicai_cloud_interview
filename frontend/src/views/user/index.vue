@@ -3,10 +3,13 @@
     <!-- 欢迎区域 -->
     <div class="welcome-section">
       <div class="welcome-content">
-        <div class="welcome-avatar">
+        <div class="welcome-avatar" @click="triggerAvatarUpload">
           <el-avatar :size="72" :src="userStore.userInfo?.headImg">
             {{ userStore.userInfo?.username?.charAt(0) || '用' }}
           </el-avatar>
+          <div class="avatar-edit-icon">
+            <el-icon><Camera /></el-icon>
+          </div>
           <div class="vip-badge" v-if="userStore.userInfo?.role === 'ADMIN'">
             <el-icon><Star /></el-icon>
             VIP
@@ -40,10 +43,13 @@
           <div class="profile-header">
             <h3 class="section-title">个人信息</h3>
           </div>
-          <div class="profile-avatar">
+          <div class="profile-avatar" @click="triggerAvatarUpload">
             <el-avatar :size="64" :src="userStore.userInfo?.headImg">
               {{ userStore.userInfo?.username?.charAt(0) || '用' }}
             </el-avatar>
+            <div class="avatar-edit-icon small">
+              <el-icon><Camera /></el-icon>
+            </div>
             <div class="profile-name">
               <h4>{{ userStore.userInfo?.username || '用户' }}</h4>
               <el-tag :type="userStore.userInfo?.role === 'ADMIN' ? 'danger' : 'info'" size="small" effect="dark">
@@ -58,10 +64,13 @@
               <span class="info-label">手机号</span>
               <span class="info-value">{{ maskPhone(userStore.userInfo?.phone) }}</span>
             </div>
-            <div class="info-item">
+            <div class="info-item email-item" @click="showEmailDialog">
               <el-icon><Message /></el-icon>
               <span class="info-label">邮箱</span>
-              <span class="info-value">{{ userStore.userInfo?.email || '未绑定' }}</span>
+              <span class="info-value editable">
+                {{ userStore.userInfo?.email || '未绑定' }}
+                <el-icon class="edit-icon"><Edit /></el-icon>
+              </span>
             </div>
             <div class="info-item">
               <el-icon><Calendar /></el-icon>
@@ -168,25 +177,134 @@
         </el-card>
       </el-col>
     </el-row>
+
+    <!-- 隐藏的文件输入框 -->
+    <input
+      ref="fileInput"
+      type="file"
+      accept="image/jpeg,image/png,image/gif,image/webp"
+      style="display: none"
+      @change="handleFileChange"
+    />
+
+    <!-- 邮箱更新弹窗 -->
+    <el-dialog v-model="emailDialogVisible" title="更新邮箱" width="400px" destroy-on-close>
+      <div class="email-dialog-content">
+        <p class="email-tip">请输入新的邮箱地址</p>
+        <el-input v-model="emailInput" placeholder="请输入邮箱" clearable />
+      </div>
+      <template #footer>
+        <el-button @click="emailDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="emailLoading" @click="confirmUpdateEmail">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Message, Calendar, Document, ChatDotRound, ShoppingBag, Tickets,
-  Refresh, SwitchButton, ArrowRight, Star, VideoPlay, Upload, Goods
+  Refresh, SwitchButton, ArrowRight, Star, VideoPlay, Upload, Goods, Camera, Edit
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/user'
+import { uploadAvatarApi, updateEmailApi } from '@/api/account'
 
 const router = useRouter()
 const userStore = useUserStore()
+const fileInput = ref<HTMLInputElement | null>(null)
+const emailInput = ref('')
+const emailDialogVisible = ref(false)
+const emailLoading = ref(false)
 
 onMounted(() => {
   userStore.refreshUserInfo()
 })
+
+// 显示邮箱编辑弹窗
+function showEmailDialog() {
+  emailInput.value = userStore.userInfo?.email || ''
+  emailDialogVisible.value = true
+}
+
+// 确认更新邮箱
+async function confirmUpdateEmail() {
+  const email = emailInput.value.trim()
+  if (!email) {
+    ElMessage.warning('请输入邮箱地址')
+    return
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email)) {
+    ElMessage.warning('请输入正确的邮箱格式')
+    return
+  }
+  emailLoading.value = true
+  try {
+    await updateEmailApi(email)
+    await userStore.refreshUserInfo()
+    emailDialogVisible.value = false
+    ElMessage.success('邮箱更新成功')
+  } catch {
+    // 错误已在拦截器处理
+  } finally {
+    emailLoading.value = false
+  }
+}
+
+// 触发头像上传
+function triggerAvatarUpload() {
+  fileInput.value?.click()
+}
+
+// 处理文件选择
+async function handleFileChange(event: Event) {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+
+  // 校验文件类型
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+  if (!allowedTypes.includes(file.type)) {
+    ElMessage.error('请上传 JPG、PNG、GIF 或 WebP 格式的图片')
+    target.value = ''
+    return
+  }
+
+  // 校验文件大小（2MB）
+  if (file.size > 2 * 1024 * 1024) {
+    ElMessage.error('头像大小不能超过 2MB')
+    target.value = ''
+    return
+  }
+
+  // 确认上传
+  try {
+    await ElMessageBox.confirm('确定要更换头像吗？', '更换头像', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'info'
+    })
+  } catch {
+    target.value = ''
+    return
+  }
+
+  // 上传头像
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+    await uploadAvatarApi(formData)
+    // 刷新用户信息
+    await userStore.refreshUserInfo()
+    ElMessage.success('头像更换成功')
+  } catch {
+    // 错误已在拦截器处理
+  }
+  target.value = ''
+}
 
 // 获取欢迎语
 function getWelcomeMessage(): string {
@@ -244,10 +362,47 @@ function handleLogout() {
 
 .welcome-avatar {
   position: relative;
+  cursor: pointer;
+}
+
+.welcome-avatar:hover .avatar-edit-icon {
+  opacity: 1;
 }
 
 .welcome-avatar :deep(.el-avatar) {
   border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+/* 头像编辑图标 */
+.avatar-edit-icon {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 24px;
+  height: 24px;
+  background: #667eea;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  border: 2px solid white;
+}
+
+.avatar-edit-icon.small {
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  position: static;
+  margin-left: -24px;
+  margin-bottom: -8px;
+}
+
+.profile-avatar:hover .avatar-edit-icon {
+  opacity: 1;
 }
 
 .vip-badge {
@@ -326,6 +481,9 @@ function handleLogout() {
   align-items: center;
   gap: 16px;
   margin-bottom: 20px;
+  cursor: pointer;
+  position: relative;
+  transition: opacity 0.3s;
 }
 
 .profile-name h4 {
@@ -507,5 +665,47 @@ function handleLogout() {
     border-left: none;
     margin-top: 20px;
   }
+}
+
+/* 邮箱可编辑样式 */
+.email-item {
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.email-item:hover {
+  background: #f5f7fa;
+  border-radius: 8px;
+  margin: -4px -8px;
+  padding: 4px 8px;
+}
+
+.email-item .info-value.editable {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.email-item .edit-icon {
+  font-size: 14px;
+  color: #909399;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.email-item:hover .edit-icon {
+  opacity: 1;
+  color: #667eea;
+}
+
+/* 邮箱弹窗样式 */
+.email-dialog-content {
+  padding: 10px 0;
+}
+
+.email-tip {
+  margin: 0 0 16px 0;
+  color: #909399;
+  font-size: 14px;
 }
 </style>

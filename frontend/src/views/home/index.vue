@@ -44,7 +44,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { Upload, ChatDotRound, ShoppingCart, List } from '@element-plus/icons-vue'
-import { getBannerListApi } from '@/api/product'
+import { useCacheStore } from '@/store/cache'
 
 interface Banner {
   id: number
@@ -53,12 +53,13 @@ interface Banner {
   text: string
 }
 
+const cacheStore = useCacheStore()
 const bannerList = ref<Banner[]>([])
 
 onMounted(async () => {
   try {
-    const res = await getBannerListApi()
-    bannerList.value = res.data || []
+    // 从缓存获取（5分钟有效）
+    bannerList.value = await cacheStore.getBannerList()
   } catch (e) {
     // 静默处理
   }
