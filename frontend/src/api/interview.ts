@@ -44,8 +44,8 @@ export interface InterviewDTO {
 
 export interface InterviewDetailDTO {
   id: number
-  position: string
-  score?: number
+  title: string
+  overallScore?: number
   status: string
   gmtCreate: string
   rounds: InterviewRoundDTO[]

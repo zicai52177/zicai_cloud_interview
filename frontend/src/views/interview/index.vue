@@ -325,7 +325,7 @@ onMounted(() => {
   align-items: flex-start;
   margin-bottom: 28px;
   padding: 32px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
   border-radius: 20px;
   color: white;
 }
@@ -358,7 +358,7 @@ onMounted(() => {
   font-size: 16px;
   border-radius: 12px;
   background: white;
-  color: #667eea;
+  color: #ff7e5f;
   border: none;
   font-weight: 600;
   display: flex;
@@ -419,14 +419,14 @@ onMounted(() => {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(90deg, #ff7e5f 0%, #feb47b 100%);
   opacity: 0;
   transition: opacity 0.3s;
 }
 
 .interview-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 16px 48px rgba(102, 126, 234, 0.18);
+  box-shadow: 0 16px 48px rgba(255, 126, 95, 0.18);
   border-color: transparent;
 }
 
@@ -562,7 +562,7 @@ onMounted(() => {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+  background: linear-gradient(135deg, #ff7e5f20 0%, #feb47b20 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -571,7 +571,7 @@ onMounted(() => {
 
 .process-icon {
   font-size: 40px;
-  color: #667eea;
+  color: #ff7e5f;
   animation: rotate 2s linear infinite;
 }
 
@@ -621,7 +621,7 @@ onMounted(() => {
   width: 160px;
   height: 160px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+  background: linear-gradient(135deg, #ff7e5f15 0%, #feb47b15 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -629,7 +629,7 @@ onMounted(() => {
 }
 
 .empty-icon {
-  color: #667eea;
+  color: #ff7e5f;
   opacity: 0.6;
 }
 

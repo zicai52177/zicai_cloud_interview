@@ -38,8 +38,8 @@
               <span class="highlight-text">{{ detail.position || '未指定' }}</span>
             </el-descriptions-item>
             <el-descriptions-item label="面试得分">
-              <div v-if="detail.score !== undefined && detail.score !== null" class="score-display">
-                <span class="score-value" :class="getScoreClass(detail.score)">{{ detail.score }}</span>
+              <div v-if="detail.overallScore !== undefined && detail.overallScore !== null" class="score-display">
+                <span class="score-value" :class="getScoreClass(detail.overallScore)">{{ detail.overallScore }}</span>
                 <span class="score-unit">分</span>
               </div>
               <el-tag v-else type="warning" size="small">进行中</el-tag>
@@ -206,18 +206,34 @@ async function handleDelete() {
 // 状态相关
 function getStatusType(status?: string): 'success' | 'warning' | 'info' | 'danger' | undefined {
   const map: Record<string, 'success' | 'warning' | 'info' | 'danger'> = {
-    PROCESSING: 'warning',
-    FINISHED: 'success',
-    CANCELLED: 'info'
+    GENERATING: 'info',
+    GENERATE_ROUND: 'info',
+    GENERATE_QA: 'info',
+    IN_PROGRESS: 'warning',
+    EVALUATING: 'warning',
+    COMPLETED: 'success',
+    CANCELLED: 'info',
+  }
+  // FAILED 开头的状态
+  if (status?.startsWith('FAILED')) {
+    return 'danger'
   }
   return map[status || '']
 }
 
 function getStatusText(status?: string) {
   const map: Record<string, string> = {
-    PROCESSING: '面试进行中',
-    FINISHED: '已完成',
-    CANCELLED: '已取消'
+    GENERATING: '生成中',
+    GENERATE_ROUND: '生成轮次',
+    GENERATE_QA: '生成题目',
+    IN_PROGRESS: '面试进行中',
+    EVALUATING: '评分中',
+    COMPLETED: '已完成',
+    CANCELLED: '已取消',
+  }
+  // FAILED 开头的状态统一显示为"失败"
+  if (status?.startsWith('FAILED')) {
+    return '面试失败'
   }
   return map[status || ''] || '未知状态'
 }
@@ -278,7 +294,7 @@ onMounted(() => {
 
 .title-icon {
   font-size: 28px;
-  color: #667eea;
+  color: #ff7e5f;
 }
 
 .header-right {
@@ -304,7 +320,7 @@ onMounted(() => {
 
 .highlight-text {
   font-weight: 600;
-  color: #667eea;
+  color: #ff7e5f;
 }
 
 .score-display {
@@ -406,7 +422,7 @@ onMounted(() => {
   flex-shrink: 0;
   width: 32px;
   height: 32px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
   color: white;
   border-radius: 50%;
   display: flex;

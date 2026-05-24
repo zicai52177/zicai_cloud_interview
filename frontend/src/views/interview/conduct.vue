@@ -21,7 +21,7 @@
       <div class="status-content">
         <div class="status-info">
           <div class="position-label">当前面试岗位</div>
-          <div class="position-value">{{ interviewInfo.position || '加载中...' }}</div>
+          <div class="position-value">{{ interviewInfo.title || '加载中...' }}</div>
         </div>
         <div class="progress-section">
           <el-progress
@@ -207,7 +207,7 @@ const router = useRouter()
 
 // 状态
 const interviewId = ref<number>(0)
-const interviewInfo = ref<{ position?: string }>({})
+const interviewInfo = ref<{ title?: string }>({})
 const interviewDetail = ref<InterviewDetailDTO | null>(null)
 const statusLoading = ref(false)
 const contentLoading = ref(false)
@@ -283,8 +283,8 @@ async function fetchInterviewDetail() {
     const res = await getInterviewDetailApi(interviewId.value)
     interviewDetail.value = res.data
 
-    if (res.data?.position) {
-      interviewInfo.value.position = res.data.position
+    if (res.data?.title) {
+      interviewInfo.value.title = res.data.title
     }
 
     // 如果有已回答的题目，加载对话历史
@@ -486,7 +486,7 @@ onUnmounted(() => {
 
 .title-icon {
   font-size: 28px;
-  color: #667eea;
+  color: #ff7e5f;
 }
 
 .blink-icon {
@@ -581,7 +581,7 @@ onUnmounted(() => {
 .ai-avatar {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -635,7 +635,7 @@ onUnmounted(() => {
 }
 
 .ai .chat-avatar {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
   color: white;
 }
 
@@ -711,7 +711,7 @@ onUnmounted(() => {
 .loading-icon {
   animation: rotate 1.5s linear infinite;
   margin-bottom: 16px;
-  color: #667eea;
+  color: #ff7e5f;
 }
 
 @keyframes rotate {

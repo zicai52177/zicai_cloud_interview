@@ -311,7 +311,7 @@ onMounted(() => {
 
 .title-icon {
   font-size: 28px;
-  color: #667eea;
+  color: #ff7e5f;
 }
 
 /* 表单卡片 */
@@ -422,6 +422,6 @@ onMounted(() => {
 }
 
 .tips-list li::marker {
-  color: #667eea;
+  color: #ff7e5f;
 }
 </style>
