@@ -441,7 +441,7 @@ function formatDate(dateStr: string) {
   align-items: flex-start;
   margin-bottom: 28px;
   padding: 32px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
   border-radius: 20px;
   color: white;
 }
@@ -474,7 +474,7 @@ function formatDate(dateStr: string) {
   font-size: 16px;
   border-radius: 12px;
   background: white;
-  color: #667eea;
+  color: #ff7e5f;
   border: none;
   font-weight: 600;
   display: flex;
@@ -528,7 +528,7 @@ function formatDate(dateStr: string) {
 
 .file-icon {
   font-size: 20px;
-  color: #667eea;
+  color: #ff7e5f;
 }
 
 .filename {
@@ -553,7 +553,7 @@ function formatDate(dateStr: string) {
 
 /* 分析结果弹窗样式 */
 .result-dialog :deep(.el-dialog__header) {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
   color: white;
   padding: 20px 24px;
   margin: 0;
@@ -590,7 +590,7 @@ function formatDate(dateStr: string) {
 
 .section-icon {
   font-size: 20px;
-  color: #667eea;
+  color: #ff7e5f;
 }
 
 .section-header h4 {
@@ -691,7 +691,7 @@ function formatDate(dateStr: string) {
   gap: 8px;
   font-weight: 600;
   font-size: 14px;
-  color: #667eea;
+  color: #ff7e5f;
   margin-bottom: 10px;
 }
 
@@ -764,7 +764,7 @@ function formatDate(dateStr: string) {
 }
 
 .evaluation-section {
-  background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+  background: linear-gradient(135deg, #ff7e5f10 0%, #feb47b10 100%);
 }
 
 .evaluation-box {

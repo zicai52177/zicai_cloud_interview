@@ -145,7 +145,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Plus, Search, Clock, Reading, Loading, Microphone, ArrowRight } from '@element-plus/icons-vue'
-import { getInterviewListApi, deleteInterviewApi } from '@/api/interview'
+import { getInterviewInformationApi, deleteInterviewApi } from '@/api/interview'
 import type { InterviewDTO } from '@/api/interview'
 
 const router = useRouter()

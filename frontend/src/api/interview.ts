@@ -58,6 +58,7 @@ export interface InterviewDTO {
 export interface InterviewDetailDTO {
   id: number
   title: string
+  position?: string
   overallScore?: number
   status: string
   gmtCreate: string

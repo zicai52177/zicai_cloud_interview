@@ -176,7 +176,7 @@
           <template #header>
             <div class="card-header">
               <span>
-                <el-icon><LightBulb /></el-icon>
+                <el-icon><InfoFilled /></el-icon>
                 改进建议
               </span>
             </div>
@@ -220,7 +220,7 @@ import {
   ChatLineSquare,
   CircleCheckFilled,
   WarnTriangleFilled,
-  LightBulb,
+  InfoFilled,
   View
 } from '@element-plus/icons-vue'
 import { getInterviewInformationApi } from '@/api/interview'

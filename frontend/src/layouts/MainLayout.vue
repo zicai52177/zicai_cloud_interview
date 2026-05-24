@@ -161,7 +161,7 @@ function handleLogout() {
 
 .logo-icon {
   font-size: 28px;
-  color: #667eea;
+  color: #ff7e5f;
 }
 
 .logo h1 {
@@ -189,13 +189,13 @@ function handleLogout() {
 }
 
 .nav-menu :deep(.el-menu-item:hover) {
-  color: #667eea;
+  color: #ff7e5f;
   background: transparent;
 }
 
 .nav-menu :deep(.el-menu-item.is-active) {
-  color: #667eea;
-  border-bottom: 3px solid #667eea;
+  color: #ff7e5f;
+  border-bottom: 3px solid #ff7e5f;
 }
 
 .nav-menu :deep(.el-menu-item .el-icon) {

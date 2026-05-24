@@ -508,14 +508,14 @@ onUnmounted(() => {
 .logo {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
   border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   margin-bottom: 24px;
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 10px 30px rgba(255, 126, 95, 0.4);
 }
 
 .brand-name {
@@ -559,7 +559,7 @@ onUnmounted(() => {
 .feature-icon {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -594,7 +594,7 @@ onUnmounted(() => {
 .stat-value {
   font-size: 32px;
   font-weight: 700;
-  color: #667eea;
+  color: #ff7e5f;
   margin-bottom: 4px;
 }
 
@@ -814,7 +814,7 @@ onUnmounted(() => {
   border-radius: 12px;
   font-size: 16px;
   font-weight: 600;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
   border: none;
   margin-top: 16px;
 }

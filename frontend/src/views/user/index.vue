@@ -347,7 +347,7 @@ function handleLogout() {
 
 /* 欢迎区域 */
 .welcome-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
   border-radius: 16px;
   padding: 32px;
   margin-bottom: 24px;
@@ -380,7 +380,7 @@ function handleLogout() {
   right: 0;
   width: 24px;
   height: 24px;
-  background: #667eea;
+  background: #ff7e5f;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -506,7 +506,7 @@ function handleLogout() {
 }
 
 .info-item .el-icon {
-  color: #667eea;
+  color: #ff7e5f;
   font-size: 18px;
 }
 
@@ -546,8 +546,8 @@ function handleLogout() {
 
 .feature-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.15);
-  border-color: #667eea;
+  box-shadow: 0 12px 40px rgba(255, 126, 95, 0.15);
+  border-color: #ff7e5f;
 }
 
 .feature-icon {
@@ -564,7 +564,7 @@ function handleLogout() {
 }
 
 .resume-icon {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
 }
 
 .interview-icon {
@@ -605,7 +605,7 @@ function handleLogout() {
 }
 
 .feature-card:hover .arrow-icon {
-  color: #667eea;
+  color: #ff7e5f;
   transform: translateX(4px);
 }
 
@@ -640,7 +640,7 @@ function handleLogout() {
 }
 
 .action-item:hover {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
   color: white;
 }
 
@@ -695,7 +695,7 @@ function handleLogout() {
 
 .email-item:hover .edit-icon {
   opacity: 1;
-  color: #667eea;
+  color: #ff7e5f;
 }
 
 /* 邮箱弹窗样式 */
