@@ -50,7 +50,7 @@
         >
           <div class="card-header">
             <div class="position-info">
-              <h3 class="position-name">{{ item.position || '未指定岗位' }}</h3>
+              <h3 class="position-name">{{ item.title || '未指定岗位' }}</h3>
               <el-tag
                 :type="getStatusType(item.status)"
                 size="small"
@@ -62,16 +62,16 @@
           </div>
 
           <div class="card-body">
-            <div class="score-section" v-if="item.score !== undefined && item.score !== null">
-              <div class="score-ring" :class="getScoreClass(item.score)">
+            <div class="score-section" v-if="item.overallScore !== undefined && item.overallScore !== null">
+              <div class="score-ring" :class="getScoreClass(item.overallScore)">
                 <div class="score-inner">
-                  <span class="score-value">{{ item.score }}</span>
+                  <span class="score-value">{{ item.overallScore }}</span>
                   <span class="score-unit">分</span>
                 </div>
               </div>
               <div class="score-desc">
                 <span class="score-label">面试得分</span>
-                <span class="score-badge" :class="getScoreClass(item.score)">{{ getScoreLabel(item.score) }}</span>
+                <span class="score-badge" :class="getScoreClass(item.overallScore)">{{ getScoreLabel(item.overallScore) }}</span>
               </div>
             </div>
             <div class="score-section no-score" v-else>
