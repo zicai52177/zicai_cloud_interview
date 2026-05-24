@@ -152,30 +152,36 @@ public class ProductOrderServiceImpl implements ProductOrderService {
 
     private void handleWechatTimeOutOrder(ProductOrderDO productOrderDO) {
 
-        Transaction transaction = wechatPayUtil.queryOrderByOutTradeNo(productOrderDO.getOutTradeNo());
+        try {
+            Transaction transaction = wechatPayUtil.queryOrderByOutTradeNo(productOrderDO.getOutTradeNo());
 
-        if(transaction == null){
-            log.error("订单不存在：{}", productOrderDO.getOutTradeNo());
-            return;
-        }
-        if(transaction.getTradeState().equals(Transaction.TradeStateEnum.SUCCESS)){
-            log.warn("回调异常补偿机制，订单已支付，但是数据库未更新，订单号：{}", productOrderDO.getOutTradeNo());
-            int updated = updateOrderState(productOrderDO.getOutTradeNo(), transaction.getTransactionId(), OrderStateEnum.PAY.name());
-            if(updated > 0){
-                log.info("订单已支付，更新数据库成功，订单号：{}", productOrderDO.getOutTradeNo());
-            }else {
-                log.error("订单已支付，更新数据库失败，订单号：{}", productOrderDO.getOutTradeNo());
+            if (transaction == null) {
+                log.warn("微信支付查询返回null，强制取消订单：{}", productOrderDO.getOutTradeNo());
+                cancelOrder(productOrderDO);
+                return;
             }
-        }else if(Transaction.TradeStateEnum.USERPAYING.equals(transaction.getTradeState())){
-            log.warn("回调异常补偿机制，订单正在支付，但是数据库未更新，订单号：{}", productOrderDO.getOutTradeNo());
-        }else {
-            log.warn("订单已关闭，更新订单状态为已取消，订单号：{},订单状态：{}", productOrderDO.getOutTradeNo(), transaction.getTradeState());
-            cancleOrder(productOrderDO);
+            if (Transaction.TradeStateEnum.SUCCESS.equals(transaction.getTradeState())) {
+                log.warn("回调异常补偿机制，订单已支付，但是数据库未更新，订单号：{}", productOrderDO.getOutTradeNo());
+                int updated = updateOrderState(productOrderDO.getOutTradeNo(), transaction.getTransactionId(), OrderStateEnum.PAY.name());
+                if (updated > 0) {
+                    log.info("订单已支付，更新数据库成功，订单号：{}", productOrderDO.getOutTradeNo());
+                } else {
+                    log.error("订单已支付，更新数据库失败，订单号：{}", productOrderDO.getOutTradeNo());
+                }
+            } else if (Transaction.TradeStateEnum.USERPAYING.equals(transaction.getTradeState())) {
+                log.warn("回调异常补偿机制，订单正在支付，但是数据库未更新，订单号：{}", productOrderDO.getOutTradeNo());
+            } else {
+                log.warn("订单已关闭，更新订单状态为已取消，订单号：{},订单状态：{}", productOrderDO.getOutTradeNo(), transaction.getTradeState());
+                cancelOrder(productOrderDO);
+            }
+        } catch (Exception e) {
+            log.error("微信支付查询接口调用失败，强制取消订单：{}", productOrderDO.getOutTradeNo(), e);
+            cancelOrder(productOrderDO);
         }
 
     }
 
-    private void cancleOrder(ProductOrderDO productOrderDO) {
+    private void cancelOrder(ProductOrderDO productOrderDO) {
         wechatPayUtil.closeOrder(productOrderDO.getOutTradeNo());
         productOrderDO.setOrderState(OrderStateEnum.CANCEL.name());
         productOrderMapper.updateById(productOrderDO);
