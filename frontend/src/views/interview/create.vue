@@ -259,9 +259,11 @@ async function handleSubmit() {
       setTimeout(() => {
         router.push(`/interview/conduct/${res.data.interviewId}`)
       }, 1000)
+    } else {
+      ElMessage.error(res.msg || '面试创建失败')
     }
-  } catch (e) {
-    // handled by request interceptor
+  } catch (e: any) {
+    ElMessage.error(e.message || '面试创建失败，请重试')
   } finally {
     submitting.value = false
   }
