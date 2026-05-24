@@ -253,11 +253,11 @@ async function handleSubmit() {
       targetCity: formData.targetCity
     })
 
-    if (res.data?.id) {
+    if (res.data?.interviewId) {
       ElMessage.success('面试创建成功，即将开始...')
       // 跳转到面试进行页面
       setTimeout(() => {
-        router.push(`/interview/conduct/${res.data.id}`)
+        router.push(`/interview/conduct/${res.data.interviewId}`)
       }, 1000)
     }
   } catch (e) {
