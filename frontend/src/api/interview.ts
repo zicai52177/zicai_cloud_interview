@@ -33,13 +33,26 @@ export interface InterviewFinishReq {
 export interface InterviewDTO {
   id: number
   title: string
-  position?: string
   description?: string
   type?: string
+  extendContent?: string
+  profile?: string
+  accountId?: number
+  resumeId?: number
   status: string
   overallScore?: number
+  summary?: string
+  strength?: string
+  improvement?: string
+  suggestion?: string
+  technicalSkills?: number
+  logicalThinking?: number
+  communication?: number
+  problemSolving?: number
+  passedQuestion?: number
+  excellentQuestion?: number
   gmtCreate: string
-  gmtModified: string
+  gmtModified?: string
 }
 
 export interface InterviewDetailDTO {
@@ -170,6 +183,18 @@ export function deleteInterviewApi(interviewId: number) {
     url: '/v1/interview/delete',
     method: 'delete',
     params: { interviewId }
+  })
+}
+
+/**
+ * 查询面试历史信息（分页）
+ * GET /api/v1/interview/information
+ */
+export function getInterviewInformationApi(page: number, size: number) {
+  return request<PageResult<InterviewDTO>>({
+    url: '/v1/interview/information',
+    method: 'get',
+    params: { page, size }
   })
 }
 

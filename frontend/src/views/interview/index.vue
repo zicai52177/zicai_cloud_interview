@@ -167,10 +167,7 @@ const searchKeyword = ref('')
 async function fetchList() {
   loading.value = true
   try {
-    const res = await getInterviewListApi({
-      page: page.value,
-      size: size.value
-    })
+    const res = await getInterviewInformationApi(page.value, size.value)
 
     let records = res.data?.records || []
     // 前端过滤（实际应后端支持）
@@ -233,6 +230,9 @@ function goToCreate() {
 function goToDetail(item: InterviewDTO) {
   if (isInProgress(item.status)) {
     router.push(`/interview/conduct/${item.id}`)
+  } else if (item.status === 'COMPLETED') {
+    // 已完成面试跳转到报告页
+    router.push(`/interview/report/${item.id}`)
   } else {
     router.push(`/interview/detail/${item.id}`)
   }
