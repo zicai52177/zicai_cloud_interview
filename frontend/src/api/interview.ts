@@ -81,11 +81,20 @@ export interface ApiResponse<T = any> {
 // ============ API接口 ============
 
 /**
+ * 创建面试响应
+ */
+export interface InterviewCreateResp {
+  interviewId: number
+  status: string
+  message: string
+}
+
+/**
  * 创建面试
  * POST /api/v1/interview/create
  */
 export function createInterviewApi(data: InterviewCreateReq) {
-  return request<InterviewDTO>({
+  return request<InterviewCreateResp>({
     url: '/v1/interview/create',
     method: 'post',
     data
