@@ -94,16 +94,15 @@ public class AccountController {
         return accountService.uploadAvatar(file);
     }
 
-    /**
-     * 更新用户邮箱
-     */
-    @PostMapping("email")
-    @Operation(summary = "更新邮箱", description = "更新当前用户的邮箱地址")
-    public JsonData updateEmail(
-            @Parameter(description = "邮箱地址", required = true)
-            @RequestParam("email") String email) {
+    @PostMapping(value = "/email",consumes = MediaType.ALL_VALUE)
+    @Operation(
+            summary = "上传邮箱",
+            description = "上传邮箱接口，返回可访问邮箱地址"
+    )
+    public JsonData email(
+            @Parameter(description = "上传上传邮箱", required = true)
+            @RequestPart("email") String email) {
         return accountService.uploadEmail(email);
     }
-
 }
 
