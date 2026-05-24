@@ -223,13 +223,13 @@ import {
   InfoFilled,
   View
 } from '@element-plus/icons-vue'
-import { getInterviewInformationApi } from '@/api/interview'
-import type { InterviewDTO } from '@/api/interview'
+import { getInterviewDetailApi } from '@/api/interview'
+import type { InterviewDetailDTO } from '@/api/interview'
 
 const route = useRoute()
 const router = useRouter()
 
-const reportData = ref<InterviewDTO | null>(null)
+const reportData = ref<InterviewDetailDTO | null>(null)
 const loading = ref(false)
 
 // 获取报告数据
@@ -243,10 +243,8 @@ async function fetchReport() {
 
   loading.value = true
   try {
-    // 通过分页接口查询单个面试详情
-    const res = await getInterviewInformationApi(1, 10)
-    const records = res.data?.records || []
-    reportData.value = records.find((item: InterviewDTO) => item.id === interviewId) || null
+    const res = await getInterviewDetailApi(interviewId)
+    reportData.value = res.data
 
     if (!reportData.value) {
       ElMessage.warning('未找到该面试记录')

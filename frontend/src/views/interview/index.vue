@@ -169,7 +169,9 @@ async function fetchList() {
   try {
     const res = await getInterviewInformationApi(page.value, size.value)
 
-    let records = res.data?.records || []
+    // 兼容处理：后端可能返回 records 或 currentData
+    let records = res.data?.records || res.data?.currentData || []
+    
     // 前端过滤（实际应后端支持）
     if (filterStatus.value) {
       if (filterStatus.value === 'FAILED') {

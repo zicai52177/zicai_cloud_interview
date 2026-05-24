@@ -302,7 +302,77 @@ public class InterviewServiceImpl implements InterviewService {
 
     @Override
     public JsonData viewInterviewDetail(Long interviewId) {
-        return null;
+        AccountDTO accountDTO = AccountLoginInterceptor.threadLocal.get();
+        if (accountDTO == null) {
+            return JsonData.buildError("用户未登录");
+        }
+
+        // 查询面试基本信息
+        InterviewDO interviewDO = findInterviewByIdAndAccount(interviewId, accountDTO.getId());
+        if (interviewDO == null) {
+            return JsonData.buildError("面试记录不存在");
+        }
+
+        // 转换为DTO
+        InterviewDTO interviewDTO = SpringBeanUtil.copyProperties(interviewDO, InterviewDTO.class);
+
+        // 查询面试轮次
+        List<InterviewRoundDO> rounds = getRoundsByInterview(interviewId, accountDTO.getId());
+
+        // 构建轮次DTO列表
+        List<Map<String, Object>> roundList = new ArrayList<>();
+        for (InterviewRoundDO round : rounds) {
+            Map<String, Object> roundMap = new HashMap<>();
+            roundMap.put("id", round.getId());
+            roundMap.put("roundName", round.getRoundType());
+            roundMap.put("totalQuestion", round.getTotalQuestion());
+            roundMap.put("answeredQuestions", round.getAnsweredQuestions());
+            roundMap.put("status", round.getStatus());
+
+            // 查询该轮次的题目
+            List<QuestionDO> questions = getQuestionsByRound(round.getId(), accountDTO.getId());
+            List<Map<String, Object>> questionList = new ArrayList<>();
+            for (QuestionDO question : questions) {
+                Map<String, Object> questionMap = new HashMap<>();
+                questionMap.put("id", question.getId());
+                questionMap.put("content", question.getContent());
+                questionMap.put("answer", question.getUserAnswer()); // 用户答案字段是 userAnswer
+                questionMap.put("evaluation", question.getEvaluation());
+                questionMap.put("type", question.getType());
+                questionMap.put("difficulty", question.getDifficulty());
+                questionMap.put("status", question.getStatus());
+                questionMap.put("score", question.getUserScore()); // 评分字段是 userScore
+                questionList.add(questionMap);
+            }
+            roundMap.put("questions", questionList);
+            roundList.add(roundMap);
+        }
+
+        // 构建结果
+        Map<String, Object> result = new HashMap<>();
+        result.put("id", interviewDTO.getId());
+        result.put("title", interviewDTO.getTitle());
+        result.put("position", interviewDTO.getDescription());
+        result.put("overallScore", interviewDTO.getOverallScore());
+        result.put("status", interviewDTO.getStatus());
+        result.put("type", interviewDTO.getType());
+        result.put("gmtCreate", interviewDTO.getGmtCreate());
+        result.put("gmtModified", interviewDTO.getGmtModified());
+        // 添加评价相关字段
+        result.put("summary", interviewDTO.getSummary());
+        result.put("strength", interviewDTO.getStrength());
+        result.put("improvement", interviewDTO.getImprovement());
+        result.put("suggestion", interviewDTO.getSuggestion());
+        result.put("technicalSkills", interviewDTO.getTechnicalSkills());
+        result.put("logicalThinking", interviewDTO.getLogicalThinking());
+        result.put("communication", interviewDTO.getCommunication());
+        result.put("problemSolving", interviewDTO.getProblemSolving());
+        result.put("passedQuestion", interviewDTO.getPassedQuestion());
+        result.put("excellentQuestion", interviewDTO.getExcellentQuestion());
+        result.put("rounds", roundList);
+
+        log.info("查询面试详情成功，面试ID：{}，轮次数：{}", interviewId, rounds.size());
+        return JsonData.buildSuccess(result);
     }
 
     @Override
@@ -323,6 +393,7 @@ public class InterviewServiceImpl implements InterviewService {
     public JsonData getInterviewInformation(int page, int size) {
         AccountDTO accountDTO = AccountLoginInterceptor.threadLocal.get();
         if (accountDTO == null) {
+            log.error("查询面试历史信息失败：用户未登录");
             return JsonData.buildError("用户未登录");
         }
         log.info("查询面试历史信息，用户ID：{}，页码：{}，每页大小：{}", accountDTO.getId(), page, size);
@@ -341,8 +412,13 @@ public class InterviewServiceImpl implements InterviewService {
 
         Page<InterviewDO> interviewPage = interviewMapper.selectPage(
                 new Page<>(page, size), queryWrapper);
-        Map<String, Object> result = CommonUtil.convertToPageMap(interviewPage, InterviewDTO.class);
-        log.info("查询面试历史信息成功，用户ID：{}，总记录数：{}", accountDTO.getId(), interviewPage.getTotal());
+
+        // 使用带records的convertToPageMap方法，确保前端能正确解析
+        List<InterviewDTO> dtoList = SpringBeanUtil.copyProperties(interviewPage.getRecords(), InterviewDTO.class);
+        Map<String, Object> result = CommonUtil.convertToPageMap(interviewPage, dtoList);
+
+        log.info("查询面试历史信息成功，用户ID：{}，总记录数：{}，当前页记录数：{}",
+                accountDTO.getId(), interviewPage.getTotal(), dtoList.size());
         return JsonData.buildSuccess(result);
     }
 
@@ -414,6 +490,18 @@ public class InterviewServiceImpl implements InterviewService {
         return questionMapper.selectList(
                 new LambdaQueryWrapper<QuestionDO>()
                         .eq(QuestionDO::getInterviewId, interviewId)
+                        .eq(QuestionDO::getAccountId, accountId)
+                        .orderByAsc(QuestionDO::getGmtCreate)
+        );
+    }
+
+    /**
+     * 查询轮次下所有题目（按创建时间升序）
+     */
+    private List<QuestionDO> getQuestionsByRound(Long roundId, Long accountId) {
+        return questionMapper.selectList(
+                new LambdaQueryWrapper<QuestionDO>()
+                        .eq(QuestionDO::getInterviewRoundId, roundId)
                         .eq(QuestionDO::getAccountId, accountId)
                         .orderByAsc(QuestionDO::getGmtCreate)
         );

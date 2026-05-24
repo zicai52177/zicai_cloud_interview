@@ -61,7 +61,20 @@ export interface InterviewDetailDTO {
   position?: string
   overallScore?: number
   status: string
+  type?: string
   gmtCreate: string
+  gmtModified?: string
+  // 评价相关字段
+  summary?: string
+  strength?: string
+  improvement?: string
+  suggestion?: string
+  technicalSkills?: number
+  logicalThinking?: number
+  communication?: number
+  problemSolving?: number
+  passedQuestion?: number
+  excellentQuestion?: number
   rounds: InterviewRoundDTO[]
 }
 
@@ -80,6 +93,7 @@ export interface QuestionDTO {
 
 export interface PageResult<T> {
   records: T[]
+  currentData?: T[]  // 后端旧接口返回字段
   totalRecord: number
   totalPage: number
   currentPage: number
