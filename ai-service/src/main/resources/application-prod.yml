@@ -14,7 +14,7 @@ spring:
       api-key: ${ALIBABA_BAILIAN_KEY}
       chat:
         options:
-          model: qwen-max
+          model: glm-5
           temperature: 0.7
           max-tokens: 2048
     mcp:

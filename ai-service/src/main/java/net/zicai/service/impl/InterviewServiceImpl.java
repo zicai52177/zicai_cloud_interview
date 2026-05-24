@@ -319,6 +319,33 @@ public class InterviewServiceImpl implements InterviewService {
         return JsonData.buildSuccess(result);
     }
 
+    @Override
+    public JsonData getInterviewInformation(int page, int size) {
+        AccountDTO accountDTO = AccountLoginInterceptor.threadLocal.get();
+        if (accountDTO == null) {
+            return JsonData.buildError("用户未登录");
+        }
+        log.info("查询面试历史信息，用户ID：{}，页码：{}，每页大小：{}", accountDTO.getId(), page, size);
+
+        // 参数校验
+        if (page < 1) {
+            page = 1;
+        }
+        if (size < 1 || size > 100) {
+            size = 10;
+        }
+
+        LambdaQueryWrapper<InterviewDO> queryWrapper = new LambdaQueryWrapper<InterviewDO>()
+                .eq(InterviewDO::getAccountId, accountDTO.getId())
+                .orderByDesc(InterviewDO::getGmtCreate);
+
+        Page<InterviewDO> interviewPage = interviewMapper.selectPage(
+                new Page<>(page, size), queryWrapper);
+        Map<String, Object> result = CommonUtil.convertToPageMap(interviewPage, InterviewDTO.class);
+        log.info("查询面试历史信息成功，用户ID：{}，总记录数：{}", accountDTO.getId(), interviewPage.getTotal());
+        return JsonData.buildSuccess(result);
+    }
+
     // ==================== 删除面试 ====================
 
     @Override

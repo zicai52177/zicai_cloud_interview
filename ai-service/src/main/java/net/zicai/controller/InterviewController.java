@@ -49,6 +49,19 @@ public class InterviewController {
     }
 
     /**
+     * 查询面试历史信息（分页）
+     */
+    @GetMapping("information")
+    @Operation(summary = "查询面试历史信息", description = "分页查询当前用户的所有面试记录，包含面试标题、类型、状态、创建时间等")
+    public JsonData getInterviewInformation(
+            @Parameter(description = "页码，从1开始", example = "1")
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @Parameter(description = "每页大小", example = "10")
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        return interviewService.getInterviewInformation(page, size);
+    }
+
+    /**
      * 回答题目
      */
     @PostMapping("answer")

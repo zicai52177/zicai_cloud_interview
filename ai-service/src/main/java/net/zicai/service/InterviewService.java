@@ -93,4 +93,14 @@ public interface InterviewService {
      * @return 删除结果
      */
     JsonData delete(Long interviewId);
+
+    /**
+     * 查询面试历史信息（分页）
+     * <p>查询指定用户的所有面试记录，返回基本信息如面试标题、类型、状态、创建时间等</p>
+     *
+     * @param page 页码（从1开始）
+     * @param size 每页大小
+     * @return 分页面试历史记录
+     */
+    JsonData getInterviewInformation(int page, int size);
 }
