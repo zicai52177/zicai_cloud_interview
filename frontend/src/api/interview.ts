@@ -33,6 +33,7 @@ export interface InterviewFinishReq {
 export interface InterviewDTO {
   id: number
   title: string
+  position?: string
   description?: string
   type?: string
   status: string

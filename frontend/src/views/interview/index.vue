@@ -19,8 +19,11 @@
     <div class="filter-bar">
       <el-select v-model="filterStatus" placeholder="面试状态" clearable size="large" class="filter-select">
         <el-option label="全部状态" value="" />
-        <el-option label="进行中" value="PROCESSING" />
-        <el-option label="已完成" value="FINISHED" />
+        <el-option label="生成中" value="GENERATING" />
+        <el-option label="进行中" value="IN_PROGRESS" />
+        <el-option label="已完成" value="COMPLETED" />
+        <el-option label="已取消" value="CANCELLED" />
+        <el-option label="失败" value="FAILED" />
       </el-select>
       <el-input
         v-model="searchKeyword"
@@ -94,7 +97,7 @@
                 size="small"
                 @click="goToDetail(item)"
               >
-                {{ item.status === 'PROCESSING' ? '继续' : '查看' }}
+                {{ isInProgress(item.status) ? '继续' : '查看' }}
                 <el-icon class="arrow-icon"><ArrowRight /></el-icon>
               </el-button>
               <el-popconfirm title="确定要删除这条面试记录吗？" @confirm="handleDelete(item.id)">
@@ -172,11 +175,15 @@ async function fetchList() {
     let records = res.data?.records || []
     // 前端过滤（实际应后端支持）
     if (filterStatus.value) {
-      records = records.filter((item: InterviewDTO) => item.status === filterStatus.value)
+      if (filterStatus.value === 'FAILED') {
+        records = records.filter((item: InterviewDTO) => item.status.startsWith('FAILED'))
+      } else {
+        records = records.filter((item: InterviewDTO) => item.status === filterStatus.value)
+      }
     }
     if (searchKeyword.value) {
       records = records.filter((item: InterviewDTO) =>
-        item.position?.includes(searchKeyword.value)
+        item.title?.includes(searchKeyword.value)
       )
     }
 
@@ -224,7 +231,7 @@ function goToCreate() {
 }
 
 function goToDetail(item: InterviewDTO) {
-  if (item.status === 'PROCESSING') {
+  if (isInProgress(item.status)) {
     router.push(`/interview/conduct/${item.id}`)
   } else {
     router.push(`/interview/detail/${item.id}`)
@@ -232,20 +239,42 @@ function goToDetail(item: InterviewDTO) {
 }
 
 // 状态相关
+function isInProgress(status: string): boolean {
+  return ['GENERATING', 'GENERATE_ROUND', 'GENERATE_QA', 'IN_PROGRESS', 'EVALUATING'].includes(status)
+}
+
 function getStatusType(status: string): 'success' | 'warning' | 'info' | 'danger' | undefined {
   const map: Record<string, 'success' | 'warning' | 'info' | 'danger'> = {
-    PROCESSING: 'warning',
-    FINISHED: 'success',
-    CANCELLED: 'info'
+    GENERATING: 'warning',
+    GENERATE_ROUND: 'warning',
+    GENERATE_QA: 'warning',
+    IN_PROGRESS: 'warning',
+    EVALUATING: 'warning',
+    COMPLETED: 'success',
+    CANCELLED: 'info',
+    FAILED_PARSE_RESUME: 'danger',
+    FAILED_GENERATE_ROUND: 'danger',
+    FAILED_GENERATE_QA: 'danger',
+    FAILED_CREATE_INTERVIEW: 'danger',
+    FAILED_EVALUATE_INTERVIEW: 'danger'
   }
   return map[status]
 }
 
 function getStatusText(status: string) {
   const map: Record<string, string> = {
-    PROCESSING: '进行中',
-    FINISHED: '已完成',
-    CANCELLED: '已取消'
+    GENERATING: '生成中',
+    GENERATE_ROUND: '生成轮次',
+    GENERATE_QA: '生成题目',
+    IN_PROGRESS: '进行中',
+    EVALUATING: '评估中',
+    COMPLETED: '已完成',
+    CANCELLED: '已取消',
+    FAILED_PARSE_RESUME: '简历解析失败',
+    FAILED_GENERATE_ROUND: '生成轮次失败',
+    FAILED_GENERATE_QA: '生成题目失败',
+    FAILED_CREATE_INTERVIEW: '创建失败',
+    FAILED_EVALUATE_INTERVIEW: '评估失败'
   }
   return map[status] || status
 }
