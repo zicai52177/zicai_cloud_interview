@@ -28,6 +28,7 @@ import net.zicai.service.ResumeService;
 import net.zicai.strategy.BenefitMessageStrategy;
 import net.zicai.strategy.BenefitMessageStrategyFactory;
 import net.zicai.util.CommonUtil;
+import net.zicai.util.SpringBeanUtil;
 import net.zicai.util.JsonData;
 import net.zicai.util.JsonUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

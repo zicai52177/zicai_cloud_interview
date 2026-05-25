@@ -1,83 +1,37 @@
 package net.zicai.util;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.TypeReference;
 import org.springframework.beans.BeanUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
- * 小滴课堂,愿景：让技术不再难学
- *
- * @Description
- * @Author 紫菜
- * @Remark 有问题直接联系我，源码-笔记-技术交流群,官网 https://xdclass.net
- * @Version 1.0
- **/
+ * Spring Bean 工具类，提供对象属性拷贝功能
+ */
 public class SpringBeanUtil {
 
-    /**
-     * 复制属性
-     *
-     * @param <T> 目标对象类型
-     * @param source 源对象
-     * @param target 目标对象类型
-     * @return 复制后的目标对象
-     */
-    public static <T> T copyProperties(Object source, Class<T> target) {
+    public static <T> T copyProperties(Object source, Class<T> targetClass) {
+        if (source == null) {
+            return null;
+        }
         try {
-            T t = target.getConstructor().newInstance();
-            BeanUtils.copyProperties(source, t);
-            return t;
+            T target = targetClass.getDeclaredConstructor().newInstance();
+            BeanUtils.copyProperties(source, target);
+            return target;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("对象属性拷贝失败", e);
         }
     }
 
-
-    /**
-     * 复制一份具有相同属性的列表
-     *
-     * @param sourceList  源列表
-     * @param target      目标对象的类型
-     * @param <T>         目标对象的类型
-     * @return            复制后的目标列表
-     */
-    public static <T> List<T> copyProperties(List<?> sourceList, Class<T> target) {
-        ArrayList<T> targetList = new ArrayList<>();
-
-        sourceList.forEach(source -> {
-            T t = copyProperties(source, target);
-            targetList.add(t);
-        });
-        return targetList;
+    public static <T> List<T> copyProperties(Collection<?> sourceList, Class<T> targetClass) {
+        List<T> result = new ArrayList<>();
+        if (sourceList == null || sourceList.isEmpty()) {
+            return result;
+        }
+        for (Object source : sourceList) {
+            result.add(copyProperties(source, targetClass));
+        }
+        return result;
     }
-
-
-    public static void copyProperties(Object source, Object target){
-        BeanUtils.copyProperties(source,target);
-    }
-
-    /**
-     * 对象转JSON字符串
-     *
-     * @param obj 源对象
-     * @return JSON字符串
-     */
-    public static String obj2Json(Object obj) {
-        return JSON.toJSONString(obj);
-    }
-
-    /**
-     * JSON字符串转List
-     *
-     * @param json JSON字符串
-     * @param <T>  目标对象类型
-     * @return 对象列表
-     */
-    public static <T> List<T> json2List(String json, Class<T> clazz) {
-        return JSON.parseArray(json, clazz);
-    }
-
 }
